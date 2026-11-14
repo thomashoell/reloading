@@ -10,7 +10,8 @@
     </parent>
     <groupId>de.tho</groupId>
     <artifactId>reloading</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <!-- the release workflow sets the version derived by semantic-release: ./mvnw -Drevision=x.y.z -->
+    <version>${revision}</version>
     <name>reloading</name>
     <description>reloading</description>
     <url/>
@@ -27,6 +28,7 @@
         <url/>
     </scm>
     <properties>
+        <revision>0.0.0-SNAPSHOT</revision>
         <java.version>25</java.version>
         <datasource-micrometer.version>2.1.1</datasource-micrometer.version>
     </properties>
@@ -164,6 +166,7 @@
     </dependencyManagement>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
