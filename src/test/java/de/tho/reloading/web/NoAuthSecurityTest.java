@@ -46,7 +46,9 @@ class NoAuthSecurityTest {
     void shouldShowHomeWithoutLoginAsDevelopmentUser() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("developer")));
+                .andExpect(content().string(containsString("developer")))
+                // the first user of an empty database is the administrator
+                .andExpect(content().string(containsString("Administrator")));
     }
 
     @Test

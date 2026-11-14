@@ -36,6 +36,15 @@ Components are split into a product and its purchased lots (`casing`/`casing_lot
 
 All measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K. Converting to and from grains, inches etc. is a concern of the user interface.
 
+## Users and permissions
+
+The identity provider only supplies the identity; users and roles live in the application (`app_user`, keyed by the OIDC subject). A user is created on the first request after the first login. The very first user becomes administrator, every later one a regular user.
+
+- Master data (manufacturers, calibers and the component products `casing`, `bullet`, `powder`, `primer`) is visible to everybody and can only be created, changed or deleted by administrators.
+- User data (rifles, lots, processed cases, loads, shooting results) belongs to the user who created it (`owner`) and is only visible to that user. Composite foreign keys make sure that user data only references user data of the same owner.
+
+With the profile `noauth` the fixed user `developer` is created the same way, so on an empty database it is the administrator.
+
 ## Contributing
 
 Changes go through pull requests against `develop`, which are squash-merged. `develop` is the default branch until the application is usable; it is then merged to `main`, which publishes the first release. The PR title must be a [Conventional Commit](https://www.conventionalcommits.org/) (e.g. `feat: add primer entity`).
