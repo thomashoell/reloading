@@ -4,33 +4,39 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Pulver</h1>
-        <a th:if="${user.admin}" class="btn btn-primary" th:href="@{/powders/new}">Neu anlegen</a>
-    </div>
-    <div th:replace="~{fragments/layout :: messages}"></div>
-    <p th:if="${#lists.isEmpty(powders)}" class="text-secondary">Noch keine Einträge vorhanden.</p>
-    <table th:unless="${#lists.isEmpty(powders)}" class="table table-hover align-middle">
+    <h1 class="h3 mb-3">Pulver</h1>
+    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
+    <form method="get" th:action="@{/powders}" class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label for="manufacturer" class="form-label">Hersteller</label>
+            <select id="manufacturer" name="manufacturer" class="form-select">
+                <option value="">Alle</option>
+                <option th:each="option : ${manufacturers}" th:value="${option.id}" th:text="${option.name}"
+                        th:selected="${option.id == selectedManufacturer}">Eintrag</option>
+            </select>
+        </div>
+        <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Filtern</button>
+            <a class="btn btn-link" th:href="@{/powders}">Zurücksetzen</a>
+        </div>
+    </form>
+    <p th:if="${page.empty}" class="text-secondary">Keine Einträge gefunden.</p>
+    <table th:unless="${page.empty}" class="table table-hover align-middle">
         <thead>
         <tr>
             <th scope="col">Hersteller</th>
             <th scope="col">Bezeichnung</th>
-            <th scope="col" th:if="${user.admin}" class="text-end">Aktionen</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="row : ${powders}">
+        <tr th:each="row : ${page.items}">
             <td th:text="${row.manufacturer}">manufacturer</td>
             <td th:text="${row.name}">name</td>
-            <td th:if="${user.admin}" class="text-end">
-                <a class="btn btn-outline-secondary btn-sm" th:href="@{/powders/{id}/edit(id=${row.id})}">Bearbeiten</a>
-                <form class="d-inline" method="post" th:action="@{/powders/{id}/delete(id=${row.id})}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Löschen</button>
-                </form>
-            </td>
         </tr>
         </tbody>
     </table>
+    <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>

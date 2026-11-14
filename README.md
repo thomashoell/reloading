@@ -38,9 +38,9 @@ All measures are stored in SI base units: lengths in m, masses in kg, velocities
 
 ## Users and permissions
 
-The identity provider only supplies the identity; users and roles live in the application (`app_user`, keyed by the OIDC subject). A user is created on the first request after the first login. The very first user becomes administrator, every later one a regular user.
+The identity provider only supplies the identity; users and roles live in the application (`app_user`, keyed by the OIDC subject). A user is created on the first request after the first login. The very first user becomes administrator, every later one a regular user. The role has no special rights yet.
 
-- Master data (manufacturers, calibers and the component products `casing`, `bullet`, `powder`, `primer`) is visible to everybody and can only be created, changed or deleted by administrators.
+- Master data (manufacturers, calibers and the component products `casing`, `bullet`, `powder`, `primer`) is visible to everybody and immutable: the application only reads it. Rows come from Liquibase changesets (`src/main/resources/db/changelog/changes/1xx-seed-*.yaml`), so a missing entry is added with a new changeset and a new version. Released changesets are never edited. The lists show 20 rows per page and can be filtered (by name, manufacturer or caliber).
 - User data (rifles, lots, processed cases, loads, shooting results) belongs to the user who created it (`owner`) and is only visible to that user. Composite foreign keys make sure that user data only references user data of the same owner.
 
 With the profile `noauth` the fixed user `developer` is created the same way, so on an empty database it is the administrator.

@@ -1,18 +1,11 @@
 package de.tho.reloading.web;
 
 import de.tho.reloading.entity.AppUser;
-import de.tho.reloading.entity.Bullet;
-import de.tho.reloading.entity.Manufacturer;
 import de.tho.reloading.repository.AppUserRepository;
-import de.tho.reloading.repository.BulletRepository;
 import de.tho.reloading.repository.CaliberRepository;
-import de.tho.reloading.repository.CasingRepository;
 import de.tho.reloading.repository.ManufacturerRepository;
-import de.tho.reloading.repository.PowderRepository;
-import de.tho.reloading.repository.PrimerRepository;
 import de.tho.reloading.user.UserService;
 import de.tho.reloading.utility.LengthUnit;
-import de.tho.reloading.utility.PrimerSize;
 import de.tho.reloading.utility.WeightUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +18,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -41,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Pages of the master data and the settings. The tests share one database and are not rolled back,
- * so every test uses its own names.
+ * Pages of the master data (read-only, the rows come from the seed changesets) and the settings.
+ * The tests share one database and are not rolled back.
  */
 @SpringBootTest
 @Testcontainers
@@ -68,19 +59,7 @@ class MasterDataPagesTest {
     private ManufacturerRepository manufacturerRepository;
 
     @Autowired
-    private BulletRepository bulletRepository;
-
-    @Autowired
     private CaliberRepository caliberRepository;
-
-    @Autowired
-    private CasingRepository casingRepository;
-
-    @Autowired
-    private PowderRepository powderRepository;
-
-    @Autowired
-    private PrimerRepository primerRepository;
 
     private MockMvc mvc;
 
@@ -92,19 +71,13 @@ class MasterDataPagesTest {
         userService.register(USER, "user");
     }
 
-    private UUID createManufacturer(String name) throws Exception {
-        mvc.perform(post("/manufacturers").with(user(ADMIN)).with(csrf()).param("name", name))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/manufacturers"));
-        return manufacturerRepository.findByName(name).orElseThrow().getId();
-    }
-
     @Test
     void shouldShowHomeWithNavigation() throws Exception {
         mvc.perform(get("/").with(user(USER)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("/webjars/bootstrap/css/bootstrap.min.css")))
                 .andExpect(content().string(containsString("href=\"/manufacturers\"")))
+                .andExpect(content().string(containsString("href=\"/primers\"")))
                 .andExpect(content().string(containsString("Benutzer")));
     }
 
@@ -115,154 +88,201 @@ class MasterDataPagesTest {
     }
 
     @Test
-    void shouldLetAdministratorCreateRenameAndDeleteManufacturer() throws Exception {
-        UUID id = createManufacturer("Sierra");
-
-        mvc.perform(get("/manufacturers").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Sierra")))
-                .andExpect(content().string(containsString("/manufacturers/new")));
-
-        mvc.perform(get("/manufacturers/" + id + "/edit").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("value=\"Sierra\"")));
-
-        mvc.perform(post("/manufacturers/" + id).with(user(ADMIN)).with(csrf()).param("name", "Sierra Bullets"))
-                .andExpect(status().is3xxRedirection());
-        assertThat(manufacturerRepository.findById(id).orElseThrow().getName()).isEqualTo("Sierra Bullets");
-
-        mvc.perform(post("/manufacturers/" + id + "/delete").with(user(ADMIN)).with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        assertThat(manufacturerRepository.findById(id)).isEmpty();
-    }
-
-    @Test
-    void shouldShowManufacturersReadOnlyToUsers() throws Exception {
-        UUID id = createManufacturer("Berger");
-
+    void shouldPageManufacturersTwentyAtATime() throws Exception {
+        // 45 manufacturers: 20 + 20 + 5
         mvc.perform(get("/manufacturers").with(user(USER)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Berger")))
+                .andExpect(content().string(containsString(">Accuracy International<")))
+                .andExpect(content().string(not(containsString(">Lapua<"))))
+                .andExpect(content().string(containsString("Einträge 1–20 von 45")))
+                .andExpect(content().string(containsString("href=\"/manufacturers?page=2\"")))
+                .andExpect(content().string(containsString("href=\"/manufacturers?page=3\"")));
+
+        mvc.perform(get("/manufacturers").param("page", "3").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Winchester<")))
+                .andExpect(content().string(not(containsString(">Accuracy International<"))))
+                .andExpect(content().string(containsString("Einträge 41–45 von 45")));
+
+        // a page beyond the end shows the last one
+        mvc.perform(get("/manufacturers").param("page", "99").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Winchester<")));
+
+        mvc.perform(get("/manufacturers").param("size", "50").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Accuracy International<")))
+                .andExpect(content().string(containsString(">Winchester<")))
+                .andExpect(content().string(not(containsString("page=2"))));
+    }
+
+    @Test
+    void shouldFilterManufacturersAndCalibersByName() throws Exception {
+        mvc.perform(get("/manufacturers").param("q", "LAP").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">Lapua<")))
+                .andExpect(content().string(not(containsString(">Norma<"))))
+                .andExpect(content().string(containsString("Einträge 1–1 von 1")));
+        mvc.perform(get("/calibers").param("q", "creedmoor").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">6.5 Creedmoor<")))
+                .andExpect(content().string(containsString(">6 mm Creedmoor<")))
+                .andExpect(content().string(not(containsString(">.308 Winchester<"))));
+        mvc.perform(get("/calibers").param("q", "no such caliber").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Keine Einträge gefunden.")));
+    }
+
+    @Test
+    void shouldOfferNoWayToChangeMasterDataEvenToTheAdministrator() throws Exception {
+        mvc.perform(get("/manufacturers").with(user(ADMIN)))
+                .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("/manufacturers/new"))))
-                .andExpect(content().string(not(containsString("/delete"))));
+                .andExpect(content().string(not(containsString("/delete"))))
+                .andExpect(content().string(not(containsString("/edit"))));
 
-        mvc.perform(get("/manufacturers/new").with(user(USER)))
-                .andExpect(status().isForbidden());
-        mvc.perform(post("/manufacturers").with(user(USER)).with(csrf()).param("name", "Nosler"))
-                .andExpect(status().isForbidden());
-        mvc.perform(post("/manufacturers/" + id).with(user(USER)).with(csrf()).param("name", "Changed"))
-                .andExpect(status().isForbidden());
-        mvc.perform(post("/manufacturers/" + id + "/delete").with(user(USER)).with(csrf()))
-                .andExpect(status().isForbidden());
+        mvc.perform(get("/manufacturers/new").with(user(ADMIN)))
+                .andExpect(status().is4xxClientError());
+        mvc.perform(post("/manufacturers").with(user(ADMIN)).with(csrf()).param("name", "Not Seeded"))
+                .andExpect(status().is4xxClientError());
+        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf()).param("name", "Not Seeded"))
+                .andExpect(status().is4xxClientError());
 
-        assertThat(manufacturerRepository.findByName("Nosler")).isEmpty();
-        assertThat(manufacturerRepository.findById(id).orElseThrow().getName()).isEqualTo("Berger");
+        assertThat(manufacturerRepository.findByName("Not Seeded")).isEmpty();
     }
 
     @Test
-    void shouldRejectBlankAndDuplicateNames() throws Exception {
-        createManufacturer("Norma");
+    void shouldFilterProductsByManufacturer() throws Exception {
+        String vihtavuori = manufacturerRepository.findByName("Vihtavuori").orElseThrow().getId().toString();
 
-        mvc.perform(post("/manufacturers").with(user(ADMIN)).with(csrf()).param("name", " "))
+        // 66 powders, sorted by manufacturer: N555 is not on the first page
+        mvc.perform(get("/powders").with(user(USER)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bitte einen Namen angeben.")));
+                .andExpect(content().string(containsString("Einträge 1–20 von 66")))
+                .andExpect(content().string(not(containsString(">N555<"))));
 
-        mvc.perform(post("/manufacturers").with(user(ADMIN)).with(csrf()).param("name", "norma"))
+        // exactly the 20 powders of Vihtavuori: one page
+        mvc.perform(get("/powders").param("manufacturer", vihtavuori).with(user(USER)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Diesen Namen gibt es bereits.")));
+                .andExpect(content().string(containsString(">N555<")))
+                .andExpect(content().string(not(containsString(">Varget<"))))
+                .andExpect(content().string(containsString("Einträge 1–20 von 20")))
+                .andExpect(content().string(not(containsString("page=2"))));
+
+        // the links to other pages keep the filter and the page size
+        mvc.perform(get("/powders").param("manufacturer", vihtavuori).param("size", "5").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Einträge 1–5 von 20")))
+                .andExpect(content().string(containsString("page=2&amp;size=5&amp;manufacturer=" + vihtavuori)));
+
+        String cci = manufacturerRepository.findByName("CCI").orElseThrow().getId().toString();
+        mvc.perform(get("/primers").param("manufacturer", cci).with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">BR-4<")))
+                .andExpect(content().string(containsString(">Small Rifle Magnum<")))
+                .andExpect(content().string(not(containsString(">205M<"))));
     }
 
     @Test
-    void shouldNotDeleteManufacturerInUse() throws Exception {
-        UUID manufacturer = createManufacturer("Lapua");
-        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "Scenar")
-                        .param("diameter", "6.71").param("weight", "139"))
-                .andExpect(status().is3xxRedirection());
+    void shouldFilterCasingsByManufacturerAndCaliber() throws Exception {
+        String peterson = manufacturerRepository.findByName("Peterson").orElseThrow().getId().toString();
+        String creedmoor = caliberRepository.findByName("6.5 Creedmoor").orElseThrow().getId().toString();
 
-        mvc.perform(post("/manufacturers/" + manufacturer + "/delete").with(user(ADMIN)).with(csrf()))
-                .andExpect(status().is3xxRedirection());
-
-        assertThat(manufacturerRepository.findById(manufacturer)).isPresent();
+        mvc.perform(get("/casings").param("manufacturer", peterson).with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Einträge 1–6 von 6")))
+                .andExpect(content().string(containsString("<td>.300 Norma Magnum</td>")));
+        mvc.perform(get("/casings").param("caliber", creedmoor).with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<td>Lapua</td>")))
+                .andExpect(content().string(containsString("<td>Starline</td>")))
+                .andExpect(content().string(not(containsString("<td>RWS</td>"))));
+        mvc.perform(get("/casings").param("manufacturer", peterson).param("caliber", creedmoor).with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Einträge 1–1 von 1")));
+        mvc.perform(get("/casings").param("manufacturer", "").param("caliber", "").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("von 79")));
     }
 
     @Test
-    void shouldManageCalibers() throws Exception {
-        mvc.perform(post("/calibers").with(user(ADMIN)).with(csrf()).param("name", "6.5 Creedmoor"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/calibers"));
-
-        mvc.perform(get("/calibers").with(user(USER)))
+    void shouldShowBulletsInTheUnitsOfTheUser() throws Exception {
+        // defaults: grains and millimeters; the diameter is always shown in inches and millimeters
+        String hornady = manufacturerRepository.findByName("Hornady").orElseThrow().getId().toString();
+        mvc.perform(get("/bullets").param("manufacturer", hornady).param("size", "100").with(user(ADMIN)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("6.5 Creedmoor")));
-        mvc.perform(post("/calibers").with(user(USER)).with(csrf()).param("name", ".308 Winchester"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void shouldStoreBulletInSiUnitsAndShowItInTheUnitsOfTheUser() throws Exception {
-        UUID manufacturer = createManufacturer("Hornady");
-
-        // the administrator works with the defaults: grains and millimeters
-        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "ELD Match")
-                        .param("diameter", "6.71").param("weight", "140").param("length", "35.1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/bullets"));
-
-        Bullet bullet = bulletRepository.findByName("ELD Match").getFirst();
-        assertThat(bullet.getManufacturer()).isEqualTo(manufacturer);
-        assertThat(bullet.getDiameter()).isEqualByComparingTo("0.00671");
-        assertThat(bullet.getWeight()).isEqualByComparingTo("0.0090718474");
-        assertThat(bullet.getLength()).isEqualByComparingTo("0.0351");
-
-        mvc.perform(get("/bullets").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Hornady")))
+                .andExpect(content().string(containsString("von 41")))
+                .andExpect(content().string(containsString(">ELD Match<")))
                 .andExpect(content().string(containsString(">140<")))
-                .andExpect(content().string(containsString(">6.71<")));
+                .andExpect(content().string(containsString(">.264 in (6.71 mm)<")))
+                .andExpect(content().string(containsString(">gr<")))
+                .andExpect(content().string(containsString(">mm<")));
 
-        // the user prefers grams and inches
         AppUser user = appUserRepository.findBySubject(USER).orElseThrow();
         userService.updateUnits(user.getId(), WeightUnit.GRAM, LengthUnit.INCH);
 
-        mvc.perform(get("/bullets").with(user(USER)))
+        mvc.perform(get("/bullets").param("manufacturer", hornady).param("size", "100").with(user(USER)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(">9.072<")))
-                .andExpect(content().string(containsString(">0.2642<")));
-
-        mvc.perform(get("/bullets/" + bullet.getId() + "/edit").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("value=\"140\"")))
-                .andExpect(content().string(containsString("value=\"6.71\"")));
+                .andExpect(content().string(containsString(">.264 in (6.71 mm)<")))
+                .andExpect(content().string(containsString(">g<")))
+                .andExpect(content().string(containsString(">in<")));
     }
 
     @Test
-    void shouldRejectInvalidAndDuplicateBullets() throws Exception {
-        UUID manufacturer = createManufacturer("Speer");
+    void shouldFilterBulletsByDiameter() throws Exception {
+        String hornady = manufacturerRepository.findByName("Hornady").orElseThrow().getId().toString();
 
-        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", "").param("name", "").param("diameter", "0").param("weight", ""))
+        // .264 in = 0.0067056 m; the filter uses the SI value, the label shows inches and millimeters
+        mvc.perform(get("/bullets").param("diameter", "0.0067056").param("size", "100").with(user(ADMIN)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bitte einen Hersteller wählen.")))
-                .andExpect(content().string(containsString("Bitte eine Bezeichnung angeben.")))
-                .andExpect(content().string(containsString("Der Durchmesser muss größer als 0 sein.")))
-                .andExpect(content().string(containsString("Bitte das Gewicht angeben.")));
+                .andExpect(content().string(containsString("Einträge 1–13 von 13")))
+                .andExpect(content().string(containsString(">143<")))
+                .andExpect(content().string(not(containsString(">168<"))))
+                .andExpect(content().string(containsString(">.264 in (6.71 mm)</option>")))
+                .andExpect(content().string(containsString(">.308 in (7.82 mm)</option>")))
+                .andExpect(content().string(containsString(">.264 in (6.71 mm)</td>")));
 
-        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "Gold Dot")
-                        .param("diameter", "7.82").param("weight", "150"))
-                .andExpect(status().is3xxRedirection());
-        mvc.perform(post("/bullets").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "gold dot")
-                        .param("diameter", "7.82").param("weight", "150"))
+        mvc.perform(get("/bullets").param("diameter", "0.0067056").param("manufacturer", hornady).with(user(ADMIN)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("gibt es bereits")));
+                .andExpect(content().string(containsString("Einträge 1–5 von 5")));
 
-        mvc.perform(post("/bullets").with(user(USER)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "TMJ")
-                        .param("diameter", "7.82").param("weight", "150"))
-                .andExpect(status().isForbidden());
+        // the links to other pages keep the diameter
+        mvc.perform(get("/bullets").param("diameter", "0.0067056").param("size", "5").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("diameter=0.0067056")));
+
+        mvc.perform(get("/bullets").param("diameter", "").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("von 80")));
+    }
+
+    @Test
+    void shouldFilterBulletsByWeight() throws Exception {
+        // 140 gr = 0.0090718474 kg; the filter uses the SI value, the label the weight unit of the user
+        mvc.perform(get("/bullets").param("weight", "0.0090718474").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Einträge 1–3 von 3")))
+                .andExpect(content().string(containsString("<td>Berger</td>")))
+                .andExpect(content().string(containsString("<td>Sierra</td>")))
+                .andExpect(content().string(containsString(">140 gr</option>")))
+                .andExpect(content().string(containsString(">168 gr</option>")));
+
+        // with a diameter selected, only the weights of that diameter are offered
+        mvc.perform(get("/bullets").param("diameter", "0.0067056").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">143 gr</option>")))
+                .andExpect(content().string(not(containsString(">168 gr</option>"))));
+
+        // the links to other pages keep the weight
+        mvc.perform(get("/bullets").param("weight", "0.0090718474").param("size", "2").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Einträge 1–2 von 3")))
+                .andExpect(content().string(containsString("weight=0.0090718474")));
+
+        mvc.perform(get("/bullets").param("weight", "").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("von 80")));
     }
 
     @Test
@@ -286,102 +306,5 @@ class MasterDataPagesTest {
         AppUser untouched = appUserRepository.findBySubject(ADMIN).orElseThrow();
         assertThat(untouched.getWeightUnit()).isEqualTo(WeightUnit.GRAIN);
         assertThat(untouched.getLengthUnit()).isEqualTo(LengthUnit.MILLIMETER);
-    }
-
-    @Test
-    void shouldManagePowders() throws Exception {
-        UUID manufacturer = createManufacturer("Vihtavuori");
-
-        mvc.perform(post("/powders").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "N555"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/powders"));
-        UUID id = powderRepository.findByName("N555").orElseThrow().getId();
-
-        mvc.perform(get("/powders").with(user(USER)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Vihtavuori")))
-                .andExpect(content().string(containsString("N555")))
-                .andExpect(content().string(not(containsString("/powders/new"))));
-        mvc.perform(get("/powders/" + id + "/edit").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("value=\"N555\"")));
-
-        mvc.perform(post("/powders").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "n555"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("gibt es bei diesem Hersteller bereits")));
-        mvc.perform(post("/powders").with(user(USER)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "N560"))
-                .andExpect(status().isForbidden());
-
-        mvc.perform(post("/powders/" + id + "/delete").with(user(ADMIN)).with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        assertThat(powderRepository.findById(id)).isEmpty();
-    }
-
-    @Test
-    void shouldManagePrimers() throws Exception {
-        UUID manufacturer = createManufacturer("CCI");
-
-        mvc.perform(get("/primers/new").with(user(ADMIN)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Small Rifle Magnum")));
-        mvc.perform(post("/primers").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "BR-4")
-                        .param("size", "SMALL_RIFLE"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/primers"));
-        assertThat(primerRepository.findByName("BR-4").getFirst().getSize()).isEqualTo(PrimerSize.SMALL_RIFLE);
-
-        mvc.perform(get("/primers").with(user(USER)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("BR-4")))
-                .andExpect(content().string(containsString("Small Rifle")));
-
-        mvc.perform(post("/primers").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "450").param("size", ""))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bitte eine Größe wählen.")));
-        mvc.perform(post("/primers").with(user(USER)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("name", "450")
-                        .param("size", "SMALL_RIFLE_MAGNUM"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void shouldManageCasings() throws Exception {
-        UUID manufacturer = createManufacturer("Peterson");
-        mvc.perform(post("/calibers").with(user(ADMIN)).with(csrf()).param("name", "6 mm Dasher"))
-                .andExpect(status().is3xxRedirection());
-        UUID caliber = caliberRepository.findByName("6 mm Dasher").orElseThrow().getId();
-
-        mvc.perform(post("/casings").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("caliber", caliber.toString()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/casings"));
-        UUID id = casingRepository.findByManufacturer(manufacturer).getFirst().getId();
-
-        mvc.perform(get("/casings").with(user(USER)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Peterson")))
-                .andExpect(content().string(containsString("6 mm Dasher")));
-        mvc.perform(get("/casings/" + id + "/edit").with(user(ADMIN)))
-                .andExpect(status().isOk());
-
-        mvc.perform(post("/casings").with(user(ADMIN)).with(csrf())
-                        .param("manufacturer", manufacturer.toString()).param("caliber", caliber.toString()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("gibt es bereits")));
-        mvc.perform(post("/casings").with(user(ADMIN)).with(csrf()).param("manufacturer", "").param("caliber", ""))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Bitte ein Kaliber wählen.")));
-        mvc.perform(post("/casings/" + id + "/delete").with(user(USER)).with(csrf()))
-                .andExpect(status().isForbidden());
-
-        // a caliber that is used by a casing can't be deleted
-        mvc.perform(post("/calibers/" + caliber + "/delete").with(user(ADMIN)).with(csrf()))
-                .andExpect(status().is3xxRedirection());
-        assertThat(caliberRepository.findById(caliber)).isPresent();
     }
 }

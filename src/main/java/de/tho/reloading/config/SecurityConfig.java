@@ -1,7 +1,6 @@
 package de.tho.reloading.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,12 +15,11 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
  * Authentication is the default: every request except the health endpoint needs an OAuth2/OIDC login.
  * The profile {@value #NO_AUTH_PROFILE} switches it off for local development; it has to be requested explicitly.
  */
+@Slf4j
 @Configuration
 public class SecurityConfig {
 
     public static final String NO_AUTH_PROFILE = "noauth";
-
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
     @Profile("!" + NO_AUTH_PROFILE)

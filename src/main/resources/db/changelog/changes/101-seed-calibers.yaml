@@ -1,0 +1,56 @@
+# Master data is immutable: the application only reads it, rows come from changesets like this one.
+# Before the first release this file may still be edited; afterwards add a new changeset file for new rows
+# (e.g. 110-seed-<what>-<date>.yaml) and never change a released one.
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1410-seed-calibers
+      author: tho
+
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO caliber (name) VALUES
+                ('.17 Hornet'),
+                ('.204 Ruger'),
+                ('.22 Hornet'),
+                ('.222 Remington'),
+                ('.223 Remington'),
+                ('.22-250 Remington'),
+                ('5.6x50 Magnum'),
+                ('.243 Winchester'),
+                ('6 mm BR Norma'),
+                ('6 mm Dasher'),
+                ('6 mm GT'),
+                ('6 mm Creedmoor'),
+                ('6.5x47 Lapua'),
+                ('6.5 Creedmoor'),
+                ('6.5x55 SE'),
+                ('6.5-284 Norma'),
+                ('6.5 PRC'),
+                ('.270 Winchester'),
+                ('7x57'),
+                ('7x64'),
+                ('7x65R'),
+                ('7 mm-08 Remington'),
+                ('7 mm Remington Magnum'),
+                ('7.62x39'),
+                ('.308 Winchester'),
+                ('.30-06 Springfield'),
+                ('.300 Winchester Short Magnum'),
+                ('.300 Winchester Magnum'),
+                ('.300 PRC'),
+                ('.300 Norma Magnum'),
+                ('8x57 IS'),
+                ('8x57 IRS'),
+                ('8x68 S'),
+                ('.338 Lapua Magnum'),
+                ('9.3x62'),
+                ('9.3x74R'),
+                ('.375 H&H Magnum'),
+                ('9 mm Luger'),
+                ('.38 Special'),
+                ('.357 Magnum'),
+                ('.40 S&W'),
+                ('10 mm Auto'),
+                ('.44 Magnum'),
+                ('.45 ACP');

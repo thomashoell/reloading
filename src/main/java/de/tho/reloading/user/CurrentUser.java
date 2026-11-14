@@ -39,7 +39,6 @@ public class CurrentUser {
         return get().getId();
     }
 
-    /** Used by {@code @PreAuthorize} on the master data repositories. */
     public boolean isAdmin() {
         return get().isAdmin();
     }
