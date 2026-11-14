@@ -37,6 +37,14 @@ final class Units {
         return plain(si.divide(factor, MathContext.DECIMAL64).setScale(scale, RoundingMode.HALF_UP)).toPlainString();
     }
 
+    /** With exactly this number of decimal places. */
+    static String formatFixed(BigDecimal si, BigDecimal factor, int scale) {
+        if (si == null) {
+            return "";
+        }
+        return si.divide(factor, MathContext.DECIMAL64).setScale(scale, RoundingMode.HALF_UP).toPlainString();
+    }
+
     /** Without trailing zeros and without an exponent (100 instead of 1E+2). */
     private static BigDecimal plain(BigDecimal value) {
         BigDecimal stripped = value.stripTrailingZeros();

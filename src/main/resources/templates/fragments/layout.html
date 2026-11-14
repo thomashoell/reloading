@@ -49,6 +49,37 @@
     <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">Fehler.</div>
 </div>
 
+<!-- page size selector of the filter forms; page is a PageView -->
+<div th:fragment="pagesize(page)" class="col-auto">
+    <label for="size" class="form-label">Pro Seite</label>
+    <select id="size" name="size" class="form-select">
+        <option value="20" th:selected="${page.size == 20}">20</option>
+        <option value="50" th:selected="${page.size == 50}">50</option>
+        <option value="100" th:selected="${page.size == 100}">100</option>
+    </select>
+</div>
+
+<!-- page is a PageView -->
+<div th:fragment="pagination(page)" class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span class="text-secondary" th:unless="${page.empty}"
+          th:text="|Einträge ${page.firstItem}–${page.lastItem} von ${page.totalItems}|">Einträge 1–20 von 66</span>
+    <nav th:if="${page.totalPages > 1}" aria-label="Seiten">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link" th:href="@{${page.url(page.number - 1)}}">Zurück</a>
+            </li>
+            <li th:each="n : ${page.pages}" class="page-item"
+                th:classappend="${n == page.number ? 'active' : (n == 0 ? 'disabled' : '')}">
+                <span th:if="${n == 0}" class="page-link">…</span>
+                <a th:unless="${n == 0}" class="page-link" th:href="@{${page.url(n)}}" th:text="${n}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link" th:href="@{${page.url(page.number + 1)}}">Weiter</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 <script th:fragment="scripts" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
 </body>

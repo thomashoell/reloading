@@ -14,18 +14,19 @@ import de.tho.reloading.entity.Primer;
 import de.tho.reloading.entity.PrimerLot;
 import de.tho.reloading.entity.ProcessedCase;
 import de.tho.reloading.entity.Rifle;
-import de.tho.reloading.utility.PrimerSize;
 import de.tho.reloading.utility.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Saved entities for the repository tests ({@code @Import(TestData.class)}).
- * Users, manufacturers, calibers and the casing are reused; every other method creates a new row, so calling
- * the same method twice in one test violates the unique constraints.
- * User data belongs to {@link #owner()} unless stated otherwise.
+ * Master data (manufacturers, calibers, products) is immutable and comes from the seed changesets, so those
+ * methods only look rows up. Users are reused; every method for user data creates a new row, so calling the same
+ * one twice in one test violates the unique constraints. User data belongs to {@link #owner()} unless stated
+ * otherwise.
  * All measures are SI base units (m, kg).
  */
 public class TestData {
@@ -85,19 +86,11 @@ public class TestData {
     }
 
     public Manufacturer manufacturer(String name) {
-        return manufacturerRepository.findByName(name).orElseGet(() -> {
-            Manufacturer manufacturer = new Manufacturer();
-            manufacturer.setName(name);
-            return manufacturerRepository.save(manufacturer);
-        });
+        return manufacturerRepository.findByName(name).orElseThrow();
     }
 
     public Caliber caliber(String name) {
-        return caliberRepository.findByName(name).orElseGet(() -> {
-            Caliber caliber = new Caliber();
-            caliber.setName(name);
-            return caliberRepository.save(caliber);
-        });
+        return caliberRepository.findByName(name).orElseThrow();
     }
 
     public Caliber caliber() {
@@ -118,13 +111,10 @@ public class TestData {
     }
 
     public Casing casing() {
-        Manufacturer manufacturer = manufacturer("Lapua");
-        return casingRepository.findByManufacturer(manufacturer.getId()).stream().findFirst().orElseGet(() -> {
-            Casing casing = new Casing();
-            casing.setManufacturer(manufacturer.getId());
-            casing.setCaliber(caliber().getId());
-            return casingRepository.save(casing);
-        });
+        UUID caliber = caliber().getId();
+        return casingRepository.findByManufacturer(manufacturer("Lapua").getId()).stream()
+                .filter(casing -> casing.getCaliber().equals(caliber))
+                .findFirst().orElseThrow();
     }
 
     public CasingLot casingLot() {
@@ -139,18 +129,14 @@ public class TestData {
         return casingLotRepository.save(lot);
     }
 
-    /** Not saved. */
-    public Bullet newBullet() {
-        Bullet bullet = new Bullet();
-        bullet.setManufacturer(manufacturer("Hornady").getId());
-        bullet.setName("ELD Match");
-        bullet.setDiameter(BULLET_DIAMETER);
-        bullet.setWeight(BULLET_WEIGHT);
-        return bullet;
-    }
-
+    /** Hornady ELD Match, .264 in, 140 gr. */
     public Bullet bullet() {
-        return bulletRepository.save(newBullet());
+        UUID hornady = manufacturer("Hornady").getId();
+        return bulletRepository.findByName("ELD Match").stream()
+                .filter(bullet -> bullet.getManufacturer().equals(hornady))
+                .filter(bullet -> bullet.getDiameter().compareTo(BULLET_DIAMETER) == 0)
+                .filter(bullet -> bullet.getWeight().compareTo(BULLET_WEIGHT) == 0)
+                .findFirst().orElseThrow();
     }
 
     public BulletLot bulletLot() {
@@ -162,10 +148,7 @@ public class TestData {
     }
 
     public Powder powder() {
-        Powder powder = new Powder();
-        powder.setManufacturer(manufacturer("Vihtavuori").getId());
-        powder.setName("N555");
-        return powderRepository.save(powder);
+        return powderRepository.findByName("N555").getFirst();
     }
 
     public PowderLot powderLot() {
@@ -177,11 +160,7 @@ public class TestData {
     }
 
     public Primer primer() {
-        Primer primer = new Primer();
-        primer.setManufacturer(manufacturer("CCI").getId());
-        primer.setName("BR-4");
-        primer.setSize(PrimerSize.SMALL_RIFLE);
-        return primerRepository.save(primer);
+        return primerRepository.findByName("BR-4").getFirst();
     }
 
     public PrimerLot primerLot() {

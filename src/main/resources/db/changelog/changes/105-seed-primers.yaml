@@ -1,0 +1,51 @@
+# Master data is immutable: the application only reads it, rows come from changesets like this one.
+# Before the first release this file may still be edited; afterwards add a new changeset file for new rows
+# (e.g. 110-seed-<what>-<date>.yaml) and never change a released one.
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1450-seed-primers
+      author: tho
+
+      changes:
+        - sql:
+            sql: |
+              -- an unknown manufacturer makes the insert fail (NOT NULL)
+              INSERT INTO primer (manufacturer, name, size)
+              SELECT (SELECT id FROM manufacturer WHERE name = v.manufacturer), v.name, v.size::primer_size
+              FROM (VALUES
+                ('CCI', '400', 'SMALL_RIFLE'),
+                ('CCI', '450', 'SMALL_RIFLE_MAGNUM'),
+                ('CCI', 'BR-4', 'SMALL_RIFLE'),
+                ('CCI', '200', 'LARGE_RIFLE'),
+                ('CCI', '250', 'LARGE_RIFLE_MAGNUM'),
+                ('CCI', 'BR-2', 'LARGE_RIFLE'),
+                ('CCI', '500', 'SMALL_PISTOL'),
+                ('CCI', '550', 'SMALL_PISTOL_MAGNUM'),
+                ('CCI', '300', 'LARGE_PISTOL'),
+                ('CCI', '350', 'LARGE_PISTOL_MAGNUM'),
+                ('Federal', '205', 'SMALL_RIFLE'),
+                ('Federal', '205M', 'SMALL_RIFLE'),
+                ('Federal', '210', 'LARGE_RIFLE'),
+                ('Federal', '210M', 'LARGE_RIFLE'),
+                ('Federal', '215', 'LARGE_RIFLE_MAGNUM'),
+                ('Federal', '215M', 'LARGE_RIFLE_MAGNUM'),
+                ('Federal', '100', 'SMALL_PISTOL'),
+                ('Federal', '200', 'SMALL_PISTOL_MAGNUM'),
+                ('Federal', '150', 'LARGE_PISTOL'),
+                ('Federal', '155', 'LARGE_PISTOL_MAGNUM'),
+                ('Remington', '6 1/2', 'SMALL_RIFLE'),
+                ('Remington', '7 1/2', 'SMALL_RIFLE'),
+                ('Remington', '9 1/2', 'LARGE_RIFLE'),
+                ('Remington', '9 1/2 M', 'LARGE_RIFLE_MAGNUM'),
+                ('Winchester', 'WSR', 'SMALL_RIFLE'),
+                ('Winchester', 'WLR', 'LARGE_RIFLE'),
+                ('Winchester', 'WLRM', 'LARGE_RIFLE_MAGNUM'),
+                ('Winchester', 'WSP', 'SMALL_PISTOL'),
+                ('Winchester', 'WLP', 'LARGE_PISTOL'),
+                ('RWS', '4033', 'SMALL_RIFLE'),
+                ('RWS', '5341', 'LARGE_RIFLE'),
+                ('RWS', '5333', 'LARGE_RIFLE_MAGNUM'),
+                ('RWS', '4031', 'SMALL_PISTOL'),
+                ('RWS', '4047', 'SMALL_PISTOL_MAGNUM'),
+                ('RWS', '5337', 'LARGE_PISTOL')
+              ) AS v (manufacturer, name, size);

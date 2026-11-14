@@ -1,0 +1,98 @@
+# Master data is immutable: the application only reads it, rows come from changesets like this one.
+# Before the first release this file may still be edited; afterwards add a new changeset file for new rows
+# (e.g. 110-seed-<what>-<date>.yaml) and never change a released one.
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1430-seed-bullets
+      author: tho
+
+      changes:
+        - sql:
+            sql: |
+              -- listed with the diameter in inches and the weight in grains, stored in SI base units (m, kg)
+              -- an unknown manufacturer makes the insert fail (NOT NULL)
+              INSERT INTO bullet (manufacturer, name, diameter, weight)
+              SELECT (SELECT id FROM manufacturer WHERE name = v.manufacturer), v.name,
+                     v.diameter_in * 0.0254, v.weight_gr * 0.00006479891
+              FROM (VALUES
+                ('Hornady', 'ELD Match', 0.224, 73),
+                ('Hornady', 'ELD Match', 0.224, 80),
+                ('Hornady', 'ELD Match', 0.224, 88),
+                ('Hornady', 'ELD Match', 0.243, 108),
+                ('Hornady', 'ELD Match', 0.264, 140),
+                ('Hornady', 'ELD Match', 0.264, 147),
+                ('Hornady', 'ELD Match', 0.284, 162),
+                ('Hornady', 'ELD Match', 0.284, 180),
+                ('Hornady', 'ELD Match', 0.308, 168),
+                ('Hornady', 'ELD Match', 0.308, 178),
+                ('Hornady', 'ELD Match', 0.308, 208),
+                ('Hornady', 'ELD Match', 0.308, 225),
+                ('Hornady', 'ELD Match', 0.338, 285),
+                ('Hornady', 'ELD-X', 0.264, 143),
+                ('Hornady', 'ELD-X', 0.284, 162),
+                ('Hornady', 'ELD-X', 0.284, 175),
+                ('Hornady', 'ELD-X', 0.308, 178),
+                ('Hornady', 'ELD-X', 0.308, 200),
+                ('Hornady', 'ELD-X', 0.308, 212),
+                ('Hornady', 'CX', 0.224, 50),
+                ('Hornady', 'CX', 0.243, 80),
+                ('Hornady', 'CX', 0.243, 90),
+                ('Hornady', 'CX', 0.257, 90),
+                ('Hornady', 'CX', 0.264, 120),
+                ('Hornady', 'CX', 0.264, 130),
+                ('Hornady', 'CX', 0.277, 100),
+                ('Hornady', 'CX', 0.277, 130),
+                ('Hornady', 'CX', 0.284, 139),
+                ('Hornady', 'CX', 0.284, 150),
+                ('Hornady', 'CX', 0.284, 160),
+                ('Hornady', 'CX', 0.308, 110),
+                ('Hornady', 'CX', 0.308, 150),
+                ('Hornady', 'CX', 0.308, 165),
+                ('Hornady', 'CX', 0.308, 180),
+                ('Hornady', 'CX', 0.308, 190),
+                ('Hornady', 'CX', 0.338, 185),
+                ('Hornady', 'CX', 0.338, 225),
+                ('Hornady', 'CX', 0.375, 250),
+                ('Hornady', 'NTX', 0.172, 15.5),
+                ('Hornady', 'NTX', 0.204, 24),
+                ('Hornady', 'NTX', 0.224, 35),
+                ('Lapua', 'Scenar', 0.224, 69),
+                ('Lapua', 'Scenar', 0.224, 77),
+                ('Lapua', 'Scenar', 0.243, 90),
+                ('Lapua', 'Scenar', 0.243, 105),
+                ('Lapua', 'Scenar', 0.264, 123),
+                ('Lapua', 'Scenar', 0.264, 139),
+                ('Lapua', 'Scenar', 0.308, 155),
+                ('Lapua', 'Scenar', 0.308, 167),
+                ('Lapua', 'Scenar', 0.308, 185),
+                ('Lapua', 'Scenar', 0.338, 250),
+                ('Lapua', 'Scenar', 0.338, 300),
+                ('Lapua', 'Scenar-L', 0.224, 69),
+                ('Lapua', 'Scenar-L', 0.224, 77),
+                ('Lapua', 'Scenar-L', 0.243, 90),
+                ('Lapua', 'Scenar-L', 0.243, 105),
+                ('Lapua', 'Scenar-L', 0.264, 120),
+                ('Lapua', 'Scenar-L', 0.264, 136),
+                ('Lapua', 'Scenar-L', 0.308, 155),
+                ('Lapua', 'Scenar-L', 0.308, 175),
+                ('Lapua', 'Scenar-L', 0.308, 220),
+                ('Sierra', 'MatchKing', 0.224, 69),
+                ('Sierra', 'MatchKing', 0.224, 77),
+                ('Sierra', 'MatchKing', 0.224, 80),
+                ('Sierra', 'MatchKing', 0.243, 107),
+                ('Sierra', 'MatchKing', 0.264, 123),
+                ('Sierra', 'MatchKing', 0.264, 140),
+                ('Sierra', 'MatchKing', 0.264, 142),
+                ('Sierra', 'MatchKing', 0.308, 155),
+                ('Sierra', 'MatchKing', 0.308, 168),
+                ('Sierra', 'MatchKing', 0.308, 175),
+                ('Sierra', 'MatchKing', 0.308, 190),
+                ('Sierra', 'MatchKing', 0.308, 220),
+                ('Sierra', 'MatchKing', 0.338, 250),
+                ('Sierra', 'MatchKing', 0.338, 300),
+                ('Berger', 'Hybrid Target', 0.243, 105),
+                ('Berger', 'Hybrid Target', 0.264, 140),
+                ('Berger', 'Hybrid Target', 0.284, 180),
+                ('Berger', 'Hybrid Target', 0.308, 185),
+                ('Berger', 'Hybrid Target', 0.308, 215)
+              ) AS v (manufacturer, name, diameter_in, weight_gr);

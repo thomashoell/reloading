@@ -41,4 +41,25 @@ public enum LengthUnit {
     public String format(BigDecimal si) {
         return Units.format(si, factor, displayScale);
     }
+
+    /** SI value to this unit with exactly this number of decimal places; empty for null. */
+    public String format(BigDecimal si, int decimalPlaces) {
+        return Units.formatFixed(si, factor, decimalPlaces);
+    }
+
+    /**
+     * Bullet diameters are always shown the way they are named: in inches with three decimal places and without
+     * the leading zero, followed by millimeters with two, e.g. ".264 in (6.71 mm)". Independent of the units of
+     * the user; empty for null.
+     */
+    public static String formatDiameter(BigDecimal si) {
+        if (si == null) {
+            return "";
+        }
+        String inches = INCH.format(si, 3);
+        if (inches.startsWith("0.")) {
+            inches = inches.substring(1);
+        }
+        return inches + " " + INCH.symbol + " (" + MILLIMETER.format(si, 2) + " " + MILLIMETER.symbol + ")";
+    }
 }

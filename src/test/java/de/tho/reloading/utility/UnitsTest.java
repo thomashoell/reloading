@@ -52,4 +52,22 @@ class UnitsTest {
         assertThat(WeightUnit.GRAIN.toSi(null)).isNull();
         assertThat(LengthUnit.INCH.fromSi(null)).isNull();
     }
+
+    @Test
+    void shouldFormatWithFixedDecimalPlaces() {
+        assertThat(LengthUnit.INCH.format(new BigDecimal("0.00762"), 3)).isEqualTo("0.300");
+        assertThat(LengthUnit.MILLIMETER.format(new BigDecimal("0.0066"), 2)).isEqualTo("6.60");
+        assertThat(LengthUnit.MILLIMETER.format(null, 2)).isEmpty();
+    }
+
+    @Test
+    void shouldFormatBulletDiameterInInchesAndMillimeters() {
+        assertThat(LengthUnit.formatDiameter(new BigDecimal("0.0067056"))).isEqualTo(".264 in (6.71 mm)");
+        assertThat(LengthUnit.formatDiameter(new BigDecimal("0.00782320"))).isEqualTo(".308 in (7.82 mm)");
+        assertThat(LengthUnit.formatDiameter(new BigDecimal("0.0095250"))).isEqualTo(".375 in (9.53 mm)");
+        assertThat(LengthUnit.formatDiameter(new BigDecimal("0.0043688"))).isEqualTo(".172 in (4.37 mm)");
+        // one inch and more keeps its integer part
+        assertThat(LengthUnit.formatDiameter(new BigDecimal("0.0254"))).isEqualTo("1.000 in (25.40 mm)");
+        assertThat(LengthUnit.formatDiameter(null)).isEmpty();
+    }
 }

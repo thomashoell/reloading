@@ -1,0 +1,57 @@
+# Master data is immutable: the application only reads it, rows come from changesets like this one.
+# Before the first release this file may still be edited; afterwards add a new changeset file for new rows
+# (e.g. 110-seed-<what>-<date>.yaml) and never change a released one.
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1400-seed-manufacturers
+      author: tho
+
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO manufacturer (name) VALUES
+                ('Accuracy International'),
+                ('Alliant'),
+                ('Alpha Munitions'),
+                ('Anschütz'),
+                ('Barnes'),
+                ('Berger'),
+                ('Bergara'),
+                ('Blaser'),
+                ('Brenneke'),
+                ('CCI'),
+                ('CZ'),
+                ('Federal'),
+                ('Fiocchi'),
+                ('Geco'),
+                ('Haenel'),
+                ('Heym'),
+                ('Hodgdon'),
+                ('Hornady'),
+                ('Howa'),
+                ('IMR'),
+                ('Krieghoff'),
+                ('Lapua'),
+                ('Lovex'),
+                ('Mauser'),
+                ('Merkel'),
+                ('Norma'),
+                ('Nosler'),
+                ('Peterson'),
+                ('Prvi Partizan'),
+                ('Remington'),
+                ('Reload Swiss'),
+                ('Rottweil'),
+                ('Ruger'),
+                ('RWS'),
+                ('Sako'),
+                ('Sauer'),
+                ('Savage'),
+                ('Sellier & Bellot'),
+                ('Sierra'),
+                ('Speer'),
+                ('Starline'),
+                ('Steyr'),
+                ('Tikka'),
+                ('Vihtavuori'),
+                ('Winchester');

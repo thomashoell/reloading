@@ -1,0 +1,82 @@
+# Master data is immutable: the application only reads it, rows come from changesets like this one.
+# Before the first release this file may still be edited; afterwards add a new changeset file for new rows
+# (e.g. 110-seed-<what>-<date>.yaml) and never change a released one.
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1440-seed-powders
+      author: tho
+
+      changes:
+        - sql:
+            sql: |
+              -- an unknown manufacturer makes the insert fail (NOT NULL)
+              INSERT INTO powder (manufacturer, name)
+              SELECT (SELECT id FROM manufacturer WHERE name = v.manufacturer), v.name
+              FROM (VALUES
+                ('Vihtavuori', 'N110'),
+                ('Vihtavuori', 'N120'),
+                ('Vihtavuori', 'N130'),
+                ('Vihtavuori', 'N133'),
+                ('Vihtavuori', 'N135'),
+                ('Vihtavuori', 'N140'),
+                ('Vihtavuori', 'N150'),
+                ('Vihtavuori', 'N160'),
+                ('Vihtavuori', 'N165'),
+                ('Vihtavuori', 'N170'),
+                ('Vihtavuori', 'N320'),
+                ('Vihtavuori', 'N330'),
+                ('Vihtavuori', 'N340'),
+                ('Vihtavuori', 'N350'),
+                ('Vihtavuori', 'N540'),
+                ('Vihtavuori', 'N550'),
+                ('Vihtavuori', 'N555'),
+                ('Vihtavuori', 'N560'),
+                ('Vihtavuori', 'N565'),
+                ('Vihtavuori', 'N570'),
+                ('Reload Swiss', 'RS12'),
+                ('Reload Swiss', 'RS20'),
+                ('Reload Swiss', 'RS24'),
+                ('Reload Swiss', 'RS30'),
+                ('Reload Swiss', 'RS36'),
+                ('Reload Swiss', 'RS40'),
+                ('Reload Swiss', 'RS50'),
+                ('Reload Swiss', 'RS52'),
+                ('Reload Swiss', 'RS60'),
+                ('Reload Swiss', 'RS62'),
+                ('Reload Swiss', 'RS70'),
+                ('Reload Swiss', 'RS76'),
+                ('Reload Swiss', 'RS80'),
+                ('Hodgdon', 'Benchmark'),
+                ('Hodgdon', 'CFE 223'),
+                ('Hodgdon', 'H110'),
+                ('Hodgdon', 'H1000'),
+                ('Hodgdon', 'H4350'),
+                ('Hodgdon', 'H4831SC'),
+                ('Hodgdon', 'H4895'),
+                ('Hodgdon', 'Retumbo'),
+                ('Hodgdon', 'Titegroup'),
+                ('Hodgdon', 'Varget'),
+                ('IMR', 'IMR 3031'),
+                ('IMR', 'IMR 4064'),
+                ('IMR', 'IMR 4350'),
+                ('IMR', 'IMR 4831'),
+                ('IMR', 'IMR 4895'),
+                ('Alliant', 'Reloder 15'),
+                ('Alliant', 'Reloder 16'),
+                ('Alliant', 'Reloder 19'),
+                ('Alliant', 'Reloder 22'),
+                ('Alliant', 'Reloder 26'),
+                ('Rottweil', 'R901'),
+                ('Rottweil', 'R902'),
+                ('Rottweil', 'R903'),
+                ('Rottweil', 'R904'),
+                ('Rottweil', 'R905'),
+                ('Rottweil', 'R907'),
+                ('Norma', '200'),
+                ('Norma', '201'),
+                ('Norma', '202'),
+                ('Norma', '203-B'),
+                ('Norma', '204'),
+                ('Norma', 'MRP'),
+                ('Norma', 'URP')
+              ) AS v (manufacturer, name);

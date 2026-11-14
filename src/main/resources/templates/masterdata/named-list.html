@@ -4,31 +4,33 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0" th:text="${title}">Hersteller</h1>
-        <a th:if="${user.admin}" class="btn btn-primary" th:href="@{|${path}/new|}">Neu anlegen</a>
-    </div>
-    <div th:replace="~{fragments/layout :: messages}"></div>
-    <p th:if="${#lists.isEmpty(items)}" class="text-secondary">Noch keine Einträge vorhanden.</p>
-    <table th:unless="${#lists.isEmpty(items)}" class="table table-hover align-middle">
+    <h1 class="h3 mb-3" th:text="${title}">Hersteller</h1>
+    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
+    <form method="get" th:action="@{${path}}" class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label for="q" class="form-label">Name enthält</label>
+            <input type="search" id="q" name="q" class="form-control" th:value="${q}">
+        </div>
+        <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Filtern</button>
+            <a class="btn btn-link" th:href="@{${path}}">Zurücksetzen</a>
+        </div>
+    </form>
+    <p th:if="${page.empty}" class="text-secondary">Keine Einträge gefunden.</p>
+    <table th:unless="${page.empty}" class="table table-hover align-middle">
         <thead>
         <tr>
             <th scope="col">Name</th>
-            <th scope="col" th:if="${user.admin}" class="text-end">Aktionen</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${items}">
-            <td th:text="${item.name}">Name</td>
-            <td th:if="${user.admin}" class="text-end">
-                <a class="btn btn-outline-secondary btn-sm" th:href="@{|${path}/${item.id}/edit|}">Bearbeiten</a>
-                <form class="d-inline" method="post" th:action="@{|${path}/${item.id}/delete|}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Löschen</button>
-                </form>
-            </td>
+        <tr th:each="item : ${page.items}">
+            <td th:text="${item.name}">name</td>
         </tr>
         </tbody>
     </table>
+    <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>

@@ -7,8 +7,7 @@
     <h1 class="mb-4">Ladebuch</h1>
     <div th:replace="~{fragments/layout :: messages}"></div>
     <h2 class="h5">Stammdaten</h2>
-    <p class="text-secondary" th:if="${user.admin}">Als Administrator kannst du Stammdaten anlegen, ändern und löschen.</p>
-    <p class="text-secondary" th:unless="${user.admin}">Stammdaten pflegt der Administrator; du kannst sie ansehen.</p>
+    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
     <div class="list-group mb-4">
         <a class="list-group-item list-group-item-action" th:href="@{/manufacturers}">Hersteller</a>
         <a class="list-group-item list-group-item-action" th:href="@{/calibers}">Kaliber</a>

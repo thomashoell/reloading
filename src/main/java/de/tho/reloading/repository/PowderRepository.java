@@ -4,13 +4,12 @@ import de.tho.reloading.entity.Powder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface PowderRepository extends MasterDataRepository<Powder> {
 
-    Optional<Powder> findByName(String name);
+    List<Powder> findByName(String name);
 
     List<Powder> findByManufacturer(UUID manufacturer);
 }
