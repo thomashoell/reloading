@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' – Ladebuch'">Ladebuch</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+</head>
+
+<body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg bg-body-tertiary mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">Ladebuch</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation"
+                aria-controls="navigation" aria-expanded="false" aria-label="Navigation ein- oder ausblenden">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navigation">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">Stammdaten</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/manufacturers}">Hersteller</a></li>
+                        <li><a class="dropdown-item" th:href="@{/calibers}">Kaliber</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/casings}">Hülsen</a></li>
+                        <li><a class="dropdown-item" th:href="@{/bullets}">Geschosse</a></li>
+                        <li><a class="dropdown-item" th:href="@{/powders}">Pulver</a></li>
+                        <li><a class="dropdown-item" th:href="@{/primers}">Zündhütchen</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <a class="nav-link me-3" th:href="@{/settings}">
+                <span th:text="${user.username}">benutzer</span>
+                (<span th:text="${user.admin} ? 'Administrator' : 'Benutzer'">Rolle</span>)
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Abmelden</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div th:fragment="messages">
+    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}">Gespeichert.</div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}">Fehler.</div>
+</div>
+
+<script th:fragment="scripts" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

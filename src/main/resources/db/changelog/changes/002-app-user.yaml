@@ -10,6 +10,14 @@ databaseChangeLog:
         - sql:
             comment: "Spring Data JDBC binds enums as varchar; let PostgreSQL cast them to the native enum type"
             sql: "CREATE CAST (varchar AS user_role) WITH INOUT AS IMPLICIT;"
+        - sql:
+            sql: "CREATE TYPE weight_unit AS ENUM ('GRAIN', 'GRAM');"
+        - sql:
+            sql: "CREATE CAST (varchar AS weight_unit) WITH INOUT AS IMPLICIT;"
+        - sql:
+            sql: "CREATE TYPE length_unit AS ENUM ('MILLIMETER', 'INCH');"
+        - sql:
+            sql: "CREATE CAST (varchar AS length_unit) WITH INOUT AS IMPLICIT;"
         - createTable:
             tableName: app_user
             columns:
@@ -33,6 +41,17 @@ databaseChangeLog:
               - column:
                   name: role
                   type: user_role
+                  constraints:
+                    nullable: false
+              # units the user enters and reads measures in; the database stores SI base units
+              - column:
+                  name: weight_unit
+                  type: weight_unit
+                  constraints:
+                    nullable: false
+              - column:
+                  name: length_unit
+                  type: length_unit
                   constraints:
                     nullable: false
         - addUniqueConstraint:

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Zündhütchen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Zündhütchen</h1>
+        <a th:if="${user.admin}" class="btn btn-primary" th:href="@{/primers/new}">Neu anlegen</a>
+    </div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <p th:if="${#lists.isEmpty(primers)}" class="text-secondary">Noch keine Einträge vorhanden.</p>
+    <table th:unless="${#lists.isEmpty(primers)}" class="table table-hover align-middle">
+        <thead>
+        <tr>
+            <th scope="col">Hersteller</th>
+            <th scope="col">Bezeichnung</th>
+            <th scope="col">Größe</th>
+            <th scope="col" th:if="${user.admin}" class="text-end">Aktionen</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${primers}">
+            <td th:text="${row.manufacturer}">manufacturer</td>
+            <td th:text="${row.name}">name</td>
+            <td th:text="${row.size}">size</td>
+            <td th:if="${user.admin}" class="text-end">
+                <a class="btn btn-outline-secondary btn-sm" th:href="@{/primers/{id}/edit(id=${row.id})}">Bearbeiten</a>
+                <form class="d-inline" method="post" th:action="@{/primers/{id}/delete(id=${row.id})}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

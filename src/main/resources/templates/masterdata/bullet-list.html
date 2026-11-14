@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Geschosse')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Geschosse</h1>
+        <a th:if="${user.admin}" class="btn btn-primary" th:href="@{/bullets/new}">Neu anlegen</a>
+    </div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <p th:if="${#lists.isEmpty(bullets)}" class="text-secondary">Noch keine Einträge vorhanden.</p>
+    <table th:unless="${#lists.isEmpty(bullets)}" class="table table-hover align-middle">
+        <thead>
+        <tr>
+            <th scope="col">Hersteller</th>
+            <th scope="col">Bezeichnung</th>
+            <th scope="col" class="text-end">Durchmesser (<span th:text="${user.lengthUnit.symbol}">mm</span>)</th>
+            <th scope="col" class="text-end">Gewicht (<span th:text="${user.weightUnit.symbol}">gr</span>)</th>
+            <th scope="col" class="text-end">Länge (<span th:text="${user.lengthUnit.symbol}">mm</span>)</th>
+            <th scope="col" th:if="${user.admin}" class="text-end">Aktionen</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="bullet : ${bullets}">
+            <td th:text="${bullet.manufacturer}">Hersteller</td>
+            <td th:text="${bullet.name}">Bezeichnung</td>
+            <td class="text-end" th:text="${bullet.diameter}">6.71</td>
+            <td class="text-end" th:text="${bullet.weight}">140</td>
+            <td class="text-end" th:text="${bullet.length}">35.1</td>
+            <td th:if="${user.admin}" class="text-end">
+                <a class="btn btn-outline-secondary btn-sm" th:href="@{/bullets/{id}/edit(id=${bullet.id})}">Bearbeiten</a>
+                <form class="d-inline" method="post" th:action="@{/bullets/{id}/delete(id=${bullet.id})}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Löschen</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

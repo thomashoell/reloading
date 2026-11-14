@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="de" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ladebuch</title>
-</head>
+<head th:replace="~{fragments/layout :: head('Start')}"></head>
 <body>
-<h1>Ladebuch</h1>
-<p>
-    Angemeldet als <strong th:text="${user.username}">benutzer</strong>
-    (<span th:text="${user.admin} ? 'Administrator' : 'Benutzer'">Rolle</span>)
-</p>
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Abmelden</button>
-</form>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="mb-4">Ladebuch</h1>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <h2 class="h5">Stammdaten</h2>
+    <p class="text-secondary" th:if="${user.admin}">Als Administrator kannst du Stammdaten anlegen, ändern und löschen.</p>
+    <p class="text-secondary" th:unless="${user.admin}">Stammdaten pflegt der Administrator; du kannst sie ansehen.</p>
+    <div class="list-group mb-4">
+        <a class="list-group-item list-group-item-action" th:href="@{/manufacturers}">Hersteller</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/calibers}">Kaliber</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/casings}">Hülsen</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/bullets}">Geschosse</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/powders}">Pulver</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/primers}">Zündhütchen</a>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
 </body>
 </html>

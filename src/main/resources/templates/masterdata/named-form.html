@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 40rem">
+    <h1 class="h3 mb-3" th:text="${singular}">Hersteller</h1>
+    <form method="post" th:action="@{${action}}" th:object="${form}" novalidate>
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" class="form-control" th:field="*{name}"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" autofocus>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+        <a class="btn btn-link" th:href="@{${path}}">Abbrechen</a>
+    </form>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>
