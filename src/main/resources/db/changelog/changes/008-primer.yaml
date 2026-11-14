@@ -1,0 +1,76 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1100-create-primer
+      author: tho
+
+      changes:
+        - sql:
+            sql: "CREATE TYPE primer_size AS ENUM ('SMALL_RIFLE', 'SMALL_RIFLE_MAGNUM', 'LARGE_RIFLE', 'LARGE_RIFLE_MAGNUM', 'SMALL_PISTOL', 'SMALL_PISTOL_MAGNUM', 'LARGE_PISTOL', 'LARGE_PISTOL_MAGNUM');"
+        - sql:
+            comment: "Spring Data JDBC binds enums as varchar; let PostgreSQL cast them to the native enum type"
+            sql: "CREATE CAST (varchar AS primer_size) WITH INOUT AS IMPLICIT;"
+        - createTable:
+            tableName: primer
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: manufacturer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_primer_manufacturer
+                    referencedTableName: manufacturer
+                    referencedColumnNames: id
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size
+                  type: primer_size
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: primer
+            columnNames: manufacturer, name
+            constraintName: uk_primer_manufacturer_name
+            validate: true
+        - sql:
+            sql: "ALTER TABLE primer ALTER COLUMN name TYPE text COLLATE case_insensitive;"
+        - createTable:
+            tableName: primer_lot
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: primer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_primer_lot_primer
+                    referencedTableName: primer
+                    referencedColumnNames: id
+              - column:
+                  name: lot_number
+                  type: text
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: primer_lot
+            columnNames: primer, lot_number
+            constraintName: uk_primer_lot_primer_lot_number
+            validate: true
+        - sql:
+            sql: "ALTER TABLE primer_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

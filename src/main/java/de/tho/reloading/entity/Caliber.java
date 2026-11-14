@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ import java.util.UUID;
 public class Caliber {
 
     @Id
-    @ReadOnlyProperty
     private UUID id;
 
     private String name;

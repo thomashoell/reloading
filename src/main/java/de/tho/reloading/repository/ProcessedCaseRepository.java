@@ -10,7 +10,7 @@ import java.util.UUID;
 @Repository
 public interface ProcessedCaseRepository extends CrudRepository<ProcessedCase, UUID> {
 
-    List<ProcessedCase> findByParentCase(UUID parentCase);
+    List<ProcessedCase> findByCasingLot(UUID casingLot);
 
     List<ProcessedCase> findByFiredFrom(UUID firedFrom);
 }

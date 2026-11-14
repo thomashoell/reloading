@@ -1,3 +1,5 @@
+# a batch of cases of one lot that were prepared the same way
+# measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
       id: 20260224-1501-create-processed-case
@@ -15,23 +17,32 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: parent_case
+                  name: casing_lot
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_processed_case_parent_case
-                    referencedTableName: bullet_casing
+                    foreignKeyName: fk_processed_case_casing_lot
+                    referencedTableName: casing_lot
                     referencedColumnNames: id
               - column:
-                  name: is_fired
-                  type: boolean
+                  name: quantity
+                  type: integer
                   constraints:
-                    nullable: true
+                    nullable: false
+              - column:
+                  name: processed_on
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: times_fired
+                  type: integer
+                  constraints:
+                    nullable: false
               - column:
                   name: fired_from
                   type: uuid
                   constraints:
-                    checkConstraint: "is_fired = false OR fired_from IS NOT NULL"
                     foreignKeyName: fk_processed_case_rifle
                     referencedTableName: rifle
                     referencedColumnNames: id
@@ -42,31 +53,38 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: case_length
-                  type: double precision
+                  type: numeric
                   constraints:
                     nullable: false
               - column:
                   name: calibration_method
                   type: calibration
-                  constraints:
-                    nullable: true
               - column:
                   name: calibration_die
                   type: text
-                  constraints:
-                    checkConstraint: "calibration_method IS NULL OR calibration_die IS NOT NULL"
               - column:
                   name: bushing
                   type: text
-                  constraints:
-                    nullable: true
               - column:
                   name: mandrel_used
                   type: boolean
-                  constraints:
-                    nullable: true
               - column:
                   name: mandrel_diameter
-                  type: double precision
-                  constraints:
-                    checkConstraint: "mandrel_used = false OR mandrel_diameter IS NOT NULL"
+                  type: numeric
+        - sql:
+            sql: >
+              ALTER TABLE processed_case
+                ADD CONSTRAINT ck_processed_case_quantity
+                  CHECK (quantity > 0),
+                ADD CONSTRAINT ck_processed_case_times_fired
+                  CHECK (times_fired >= 0),
+                ADD CONSTRAINT ck_processed_case_fired_from
+                  CHECK (times_fired = 0 OR fired_from IS NOT NULL),
+                ADD CONSTRAINT ck_processed_case_case_length
+                  CHECK (case_length > 0),
+                ADD CONSTRAINT ck_processed_case_calibration_die
+                  CHECK (calibration_method IS NULL OR calibration_die IS NOT NULL),
+                ADD CONSTRAINT ck_processed_case_mandrel_diameter
+                  CHECK (mandrel_used IS NOT TRUE OR mandrel_diameter IS NOT NULL),
+                ADD CONSTRAINT ck_processed_case_mandrel_diameter_positive
+                  CHECK (mandrel_diameter > 0);

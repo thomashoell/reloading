@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-1135-create-casing
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: casing
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: manufacturer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_casing_manufacturer
+                    referencedTableName: manufacturer
+                    referencedColumnNames: id
+              - column:
+                  name: caliber
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_casing_caliber
+                    referencedTableName: caliber
+                    referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: casing
+            columnNames: manufacturer, caliber
+            constraintName: uk_casing_manufacturer_caliber
+            validate: true
+        - createTable:
+            tableName: casing_lot
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: casing
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_casing_lot_casing
+                    referencedTableName: casing
+                    referencedColumnNames: id
+              - column:
+                  name: lot_number
+                  type: text
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: casing_lot
+            columnNames: casing, lot_number
+            constraintName: uk_casing_lot_casing_lot_number
+            validate: true
+        - sql:
+            sql: "ALTER TABLE casing_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

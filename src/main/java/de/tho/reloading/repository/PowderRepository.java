@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface PowderRepository extends CrudRepository<Powder, UUID> {
+
     Optional<Powder> findByName(String name);
 
     List<Powder> findByManufacturer(UUID manufacturer);
