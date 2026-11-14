@@ -17,3 +17,34 @@ spring:
 #    liquibase.executor: DEBUG
 #    # If you want to see exactly how it's reading your YAML/XML files
 #    liquibase.changelog: DEBUG
+
+---
+# Login with OAuth2/OIDC (default). Issuer and client credentials come from the environment:
+#   SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI
+#   SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID
+#   SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET
+spring:
+  config:
+    activate:
+      on-profile: "!noauth"
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, email
+        provider:
+          keycloak:
+            user-name-attribute: preferred_username
+
+---
+# Local development without login: every request runs as the user "developer".
+# Only reachable from the local machine, in case the profile is activated by accident.
+spring:
+  config:
+    activate:
+      on-profile: noauth
+server:
+  address: localhost

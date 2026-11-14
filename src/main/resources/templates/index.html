@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ladebuch</title>
+</head>
+<body>
+<h1>Ladebuch</h1>
+<p>Angemeldet als <strong th:text="${username}">benutzer</strong></p>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Abmelden</button>
+</form>
+</body>
+</html>
