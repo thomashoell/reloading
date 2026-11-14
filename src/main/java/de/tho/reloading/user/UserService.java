@@ -2,12 +2,15 @@ package de.tho.reloading.user;
 
 import de.tho.reloading.entity.AppUser;
 import de.tho.reloading.repository.AppUserRepository;
+import de.tho.reloading.utility.LengthUnit;
 import de.tho.reloading.utility.UserRole;
+import de.tho.reloading.utility.WeightUnit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -43,6 +46,14 @@ public class UserService {
         user.setSubject(subject);
         user.setUsername(username);
         user.setRole(appUserRepository.count() == 0 ? UserRole.ADMIN : UserRole.USER);
+        return appUserRepository.save(user);
+    }
+
+    @Transactional
+    public AppUser updateUnits(UUID userId, WeightUnit weightUnit, LengthUnit lengthUnit) {
+        AppUser user = appUserRepository.findById(userId).orElseThrow();
+        user.setWeightUnit(weightUnit);
+        user.setLengthUnit(lengthUnit);
         return appUserRepository.save(user);
     }
 

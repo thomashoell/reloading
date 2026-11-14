@@ -34,7 +34,7 @@ SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET=<client secret
 
 Components are split into a product and its purchased lots (`casing`/`casing_lot`, `bullet`/`bullet_lot`, `powder`/`powder_lot`, `primer`/`primer_lot`). A `processed_case` is a batch of cases of one lot that were prepared the same way, a `load` a batch of cartridges made from such a batch and one lot of each component, and a `shooting_result` what a load did in a rifle.
 
-All measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K. Converting to and from grains, inches etc. is a concern of the user interface.
+All measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K. The user interface converts to and from the units each user picks in the settings (weights in grains or grams, lengths in millimeters or inches).
 
 ## Users and permissions
 

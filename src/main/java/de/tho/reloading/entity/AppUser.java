@@ -1,6 +1,8 @@
 package de.tho.reloading.entity;
 
+import de.tho.reloading.utility.LengthUnit;
 import de.tho.reloading.utility.UserRole;
+import de.tho.reloading.utility.WeightUnit;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +28,9 @@ public class AppUser {
     // display name, refreshed from the identity provider
     private String username;
     private UserRole role;
+    // units for input and display; the database stores SI base units
+    private WeightUnit weightUnit = WeightUnit.GRAIN;
+    private LengthUnit lengthUnit = LengthUnit.MILLIMETER;
 
     @Transient
     public boolean isAdmin() {
