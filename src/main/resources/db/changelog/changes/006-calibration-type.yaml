@@ -6,3 +6,6 @@ databaseChangeLog:
       changes:
         - sql:
             sql: "CREATE TYPE calibration AS ENUM ('FULL', 'NECK', 'SHOULDER_AND_NECK');"
+        - sql:
+            comment: "Spring Data JDBC binds enums as varchar; let PostgreSQL cast them to the native enum type"
+            sql: "CREATE CAST (varchar AS calibration) WITH INOUT AS IMPLICIT;"

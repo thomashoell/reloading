@@ -15,14 +15,6 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: name
-                  type: text
-                  constraints:
-                    nullable: false
-              - column:
-                  name: lot_number
-                  type: text
-              - column:
                   name: manufacturer
                   type: uuid
                   constraints:
@@ -30,12 +22,45 @@ databaseChangeLog:
                     foreignKeyName: fk_powder_manufacturer
                     referencedTableName: manufacturer
                     referencedColumnNames: id
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
         - addUniqueConstraint:
             tableName: powder
-            columnNames: manufacturer, name, lot_number
-            constraintName: uk_powder_manufacturer_name_lot_number
+            columnNames: manufacturer, name
+            constraintName: uk_powder_manufacturer_name
             validate: true
         - sql:
             sql: "ALTER TABLE powder ALTER COLUMN name TYPE text COLLATE case_insensitive;"
+        - createTable:
+            tableName: powder_lot
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: powder
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_powder_lot_powder
+                    referencedTableName: powder
+                    referencedColumnNames: id
+              - column:
+                  name: lot_number
+                  type: text
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: powder_lot
+            columnNames: powder, lot_number
+            constraintName: uk_powder_lot_powder_lot_number
+            validate: true
         - sql:
-            sql: "ALTER TABLE powder ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"
+            sql: "ALTER TABLE powder_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

@@ -4,20 +4,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 import java.util.UUID;
 
+/**
+ * A powder product; purchased lots are {@link PowderLot}s.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 public class Powder {
 
     @Id
-    @ReadOnlyProperty
     private UUID id;
 
-    private String name;
     private UUID manufacturer;
-    private String lotNumber;
+    private String name;
 }

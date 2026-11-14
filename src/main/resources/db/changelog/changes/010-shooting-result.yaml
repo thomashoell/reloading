@@ -1,0 +1,79 @@
+# measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1120-create-shooting-result
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: shooting_result
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: load
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_shooting_result_load
+                    referencedTableName: load
+                    referencedColumnNames: id
+              - column:
+                  name: rifle
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_shooting_result_rifle
+                    referencedTableName: rifle
+                    referencedColumnNames: id
+              - column:
+                  name: shot_on
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: distance
+                  type: numeric
+              - column:
+                  name: shot_count
+                  type: integer
+              - column:
+                  name: velocity_mean
+                  type: numeric
+              - column:
+                  name: velocity_sd
+                  type: numeric
+              - column:
+                  name: velocity_es
+                  type: numeric
+              - column:
+                  name: group_size
+                  type: numeric
+              - column:
+                  name: temperature
+                  type: numeric
+              - column:
+                  name: notes
+                  type: text
+        - sql:
+            sql: >
+              ALTER TABLE shooting_result
+                ADD CONSTRAINT ck_shooting_result_distance
+                  CHECK (distance > 0),
+                ADD CONSTRAINT ck_shooting_result_shot_count
+                  CHECK (shot_count > 0),
+                ADD CONSTRAINT ck_shooting_result_velocity_mean
+                  CHECK (velocity_mean > 0),
+                ADD CONSTRAINT ck_shooting_result_velocity_sd
+                  CHECK (velocity_sd >= 0),
+                ADD CONSTRAINT ck_shooting_result_velocity_es
+                  CHECK (velocity_es >= 0),
+                ADD CONSTRAINT ck_shooting_result_group_size
+                  CHECK (group_size >= 0),
+                ADD CONSTRAINT ck_shooting_result_temperature
+                  CHECK (temperature > 0);

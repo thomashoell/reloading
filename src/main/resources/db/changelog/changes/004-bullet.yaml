@@ -1,3 +1,4 @@
+# measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
       id: 20260216-1220-create-bullet
@@ -15,41 +16,74 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: type
-                  type: text
-                  constraints:
-                    nullable: false
-              - column:
-                  name: lot_number
-                  type: text
-              - column:
                   name: manufacturer
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_rifle_manufacturer
+                    foreignKeyName: fk_bullet_manufacturer
                     referencedTableName: manufacturer
                     referencedColumnNames: id
               - column:
-                  name: caliber
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: diameter
+                  type: numeric
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: numeric
+                  constraints:
+                    nullable: false
+              - column:
+                  name: length
+                  type: numeric
+        - addUniqueConstraint:
+            tableName: bullet
+            columnNames: manufacturer, name, diameter, weight
+            constraintName: uk_bullet_manufacturer_name_diameter_weight
+            validate: true
+        - sql:
+            sql: "ALTER TABLE bullet ALTER COLUMN name TYPE text COLLATE case_insensitive;"
+        - sql:
+            sql: >
+              ALTER TABLE bullet
+                ADD CONSTRAINT ck_bullet_diameter
+                  CHECK (diameter > 0),
+                ADD CONSTRAINT ck_bullet_weight
+                  CHECK (weight > 0),
+                ADD CONSTRAINT ck_bullet_length
+                  CHECK (length > 0);
+        - createTable:
+            tableName: bullet_lot
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: bullet
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_rifle_caliber
-                    referencedTableName: caliber
+                    foreignKeyName: fk_bullet_lot_bullet
+                    referencedTableName: bullet
                     referencedColumnNames: id
               - column:
-                  name: length
-                  type: double precision
-              - column:
-                  name: weight
-                  type: double precision
+                  name: lot_number
+                  type: text
+                  constraints:
+                    nullable: false
         - addUniqueConstraint:
-            tableName: bullet
-            columnNames: manufacturer, type, caliber, lot_number
-            constraintName: uk_bullet_manufacturer_type_caliber_lot_number
+            tableName: bullet_lot
+            columnNames: bullet, lot_number
+            constraintName: uk_bullet_lot_bullet_lot_number
             validate: true
         - sql:
-            sql: "ALTER TABLE bullet ALTER COLUMN type TYPE text COLLATE case_insensitive;"
-        - sql:
-            sql: "ALTER TABLE bullet ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"
+            sql: "ALTER TABLE bullet_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

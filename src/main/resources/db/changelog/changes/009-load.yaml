@@ -1,0 +1,94 @@
+# a batch of cartridges loaded with the same components and the same data
+# measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1110-create-load
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: load
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: processed_case
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_load_processed_case
+                    referencedTableName: processed_case
+                    referencedColumnNames: id
+              - column:
+                  name: bullet_lot
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_load_bullet_lot
+                    referencedTableName: bullet_lot
+                    referencedColumnNames: id
+              - column:
+                  name: powder_lot
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_load_powder_lot
+                    referencedTableName: powder_lot
+                    referencedColumnNames: id
+              - column:
+                  name: primer_lot
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_load_primer_lot
+                    referencedTableName: primer_lot
+                    referencedColumnNames: id
+              - column:
+                  name: powder_charge
+                  type: numeric
+                  constraints:
+                    nullable: false
+              - column:
+                  name: overall_length
+                  type: numeric
+                  constraints:
+                    nullable: false
+              - column:
+                  name: base_to_ogive
+                  type: numeric
+              - column:
+                  name: quantity
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: loaded_on
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rifle
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_load_rifle
+                    referencedTableName: rifle
+                    referencedColumnNames: id
+              - column:
+                  name: notes
+                  type: text
+        - sql:
+            sql: >
+              ALTER TABLE load
+                ADD CONSTRAINT ck_load_powder_charge
+                  CHECK (powder_charge > 0),
+                ADD CONSTRAINT ck_load_overall_length
+                  CHECK (overall_length > 0),
+                ADD CONSTRAINT ck_load_base_to_ogive
+                  CHECK (base_to_ogive > 0),
+                ADD CONSTRAINT ck_load_quantity
+                  CHECK (quantity > 0);

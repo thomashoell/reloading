@@ -1,22 +1,21 @@
 package de.tho.reloading.repository;
 
-import de.tho.reloading.entity.Caliber;
-import de.tho.reloading.entity.Case;
-import de.tho.reloading.entity.Manufacturer;
 import de.tho.reloading.entity.ProcessedCase;
 import de.tho.reloading.entity.Rifle;
 import de.tho.reloading.utility.Calibration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJdbcTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(TestData.class)
 public class ProcessedCaseRepositoryTest {
 
     @Container
@@ -32,90 +32,50 @@ public class ProcessedCaseRepositoryTest {
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18-alpine");
 
     @Autowired
-    private CaliberRepository caliberRepository;
-
-    @Autowired
-    private ManufacturerRepository manufacturerRepository;
-
-    @Autowired
-    private CaseRepository caseRepository;
-
-    @Autowired
-    private RifleRepository rifleRepository;
+    private TestData data;
 
     @Autowired
     private ProcessedCaseRepository sut;
 
-    private Case parentCase;
-    private Rifle rifle;
-
-    @BeforeEach
-    void setUp() {
-        Caliber caliber = new Caliber();
-        caliber.setName("6.5 Creedmoor");
-        caliber = caliberRepository.save(caliber);
-
-        Manufacturer manufacturer = new Manufacturer();
-        manufacturer.setName("Lapua");
-        manufacturer = manufacturerRepository.save(manufacturer);
-
-        parentCase = new Case();
-        parentCase.setCaliber(caliber.getId());
-        parentCase.setManufacturer(manufacturer.getId());
-        parentCase.setLotNumber("ABC1234");
-        parentCase = caseRepository.save(parentCase);
-
-        rifle = new Rifle();
-        rifle.setName("TRG 22");
-        rifle.setCaliber(caliber.getId());
-        rifle.setManufacturer(manufacturer.getId());
-        rifle = rifleRepository.save(rifle);
-    }
-
-    private ProcessedCase minimal() {
-        ProcessedCase processedCase = new ProcessedCase();
-        processedCase.setParentCase(parentCase.getId());
-        processedCase.setTrimmed(false);
-        processedCase.setCaseLength(48.6);
-        return processedCase;
-    }
-
     @Test
-    void shouldSaveAndFindByParentCase() {
-        ProcessedCase processedCase = minimal();
-        processedCase.setFired(true);
+    void shouldSaveAndFindByCasingLot() {
+        Rifle rifle = data.rifle();
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setTimesFired(2);
         processedCase.setFiredFrom(rifle.getId());
         processedCase.setTrimmed(true);
         processedCase.setCalibrationMethod(Calibration.SHOULDER_AND_NECK);
         processedCase.setCalibrationDie("Redding Type S");
         processedCase.setBushing("0.289");
         processedCase.setMandrelUsed(true);
-        processedCase.setMandrelDiameter(6.68);
+        processedCase.setMandrelDiameter(new BigDecimal("0.00668"));
 
         sut.save(processedCase);
 
-        List<ProcessedCase> found = sut.findByParentCase(parentCase.getId());
+        List<ProcessedCase> found = sut.findByCasingLot(processedCase.getCasingLot());
 
         assertThat(found).hasSize(1);
         ProcessedCase actual = found.getFirst();
         assertThat(actual.getId()).isNotNull();
-        assertThat(actual.getFired()).isTrue();
+        assertThat(actual.getQuantity()).isEqualTo(50);
+        assertThat(actual.getProcessedOn()).isEqualTo(LocalDate.of(2026, 11, 1));
+        assertThat(actual.getTimesFired()).isEqualTo(2);
         assertThat(actual.getFiredFrom()).isEqualTo(rifle.getId());
         assertThat(actual.getTrimmed()).isTrue();
-        assertThat(actual.getCaseLength()).isEqualTo(48.6);
+        assertThat(actual.getCaseLength()).isEqualByComparingTo(TestData.CASE_LENGTH);
         assertThat(actual.getCalibrationMethod()).isEqualTo(Calibration.SHOULDER_AND_NECK);
         assertThat(actual.getCalibrationDie()).isEqualTo("Redding Type S");
         assertThat(actual.getBushing()).isEqualTo("0.289");
         assertThat(actual.getMandrelUsed()).isTrue();
-        assertThat(actual.getMandrelDiameter()).isEqualTo(6.68);
+        assertThat(actual.getMandrelDiameter()).isEqualByComparingTo("0.00668");
     }
 
     @Test
     void shouldSaveMinimalProcessedCase() {
-        ProcessedCase saved = sut.save(minimal());
+        ProcessedCase saved = data.processedCase();
 
         ProcessedCase actual = sut.findById(saved.getId()).orElseThrow();
-        assertThat(actual.getFired()).isNull();
+        assertThat(actual.getTimesFired()).isZero();
         assertThat(actual.getFiredFrom()).isNull();
         assertThat(actual.getCalibrationMethod()).isNull();
         assertThat(actual.getMandrelUsed()).isNull();
@@ -123,19 +83,19 @@ public class ProcessedCaseRepositoryTest {
 
     @Test
     void shouldFindByFiredFrom() {
-        ProcessedCase processedCase = minimal();
-        processedCase.setFired(true);
+        Rifle rifle = data.rifle();
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setTimesFired(1);
         processedCase.setFiredFrom(rifle.getId());
         sut.save(processedCase);
-        sut.save(minimal());
 
         assertThat(sut.findByFiredFrom(rifle.getId())).hasSize(1);
     }
 
     @Test
-    void shouldRejectFiredCaseWithoutRifle() {
-        ProcessedCase processedCase = minimal();
-        processedCase.setFired(true);
+    void shouldRejectFiredCasesWithoutRifle() {
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setTimesFired(1);
 
         assertThatThrownBy(() -> sut.save(processedCase))
                 .isInstanceOf(DataIntegrityViolationException.class)
@@ -143,8 +103,18 @@ public class ProcessedCaseRepositoryTest {
     }
 
     @Test
+    void shouldRejectEmptyBatch() {
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setQuantity(0);
+
+        assertThatThrownBy(() -> sut.save(processedCase))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("ck_processed_case_quantity");
+    }
+
+    @Test
     void shouldRejectCalibrationMethodWithoutDie() {
-        ProcessedCase processedCase = minimal();
+        ProcessedCase processedCase = data.newProcessedCase();
         processedCase.setCalibrationMethod(Calibration.NECK);
 
         assertThatThrownBy(() -> sut.save(processedCase))
@@ -154,7 +124,7 @@ public class ProcessedCaseRepositoryTest {
 
     @Test
     void shouldRejectMandrelWithoutDiameter() {
-        ProcessedCase processedCase = minimal();
+        ProcessedCase processedCase = data.newProcessedCase();
         processedCase.setMandrelUsed(true);
 
         assertThatThrownBy(() -> sut.save(processedCase))

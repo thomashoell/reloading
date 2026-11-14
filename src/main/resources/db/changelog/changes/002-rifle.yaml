@@ -1,3 +1,4 @@
+# measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
       id: 20260216-1115-create-rifle
@@ -21,14 +22,10 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: barrel_length
-                  type: bigint
-                  constraints:
-                    nullable: true
+                  type: numeric
               - column:
                   name: length_of_twist
-                  type: bigint
-                  constraints:
-                    nullable: true
+                  type: numeric
               - column:
                   name: manufacturer
                   type: uuid
@@ -52,3 +49,10 @@ databaseChangeLog:
             validate: true
         - sql:
             sql: "ALTER TABLE rifle ALTER COLUMN name TYPE text COLLATE case_insensitive;"
+        - sql:
+            sql: >
+              ALTER TABLE rifle
+                ADD CONSTRAINT ck_rifle_barrel_length
+                  CHECK (barrel_length > 0),
+                ADD CONSTRAINT ck_rifle_length_of_twist
+                  CHECK (length_of_twist > 0);

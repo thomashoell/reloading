@@ -13,6 +13,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,5 +111,30 @@ public class RifleRepositoryTest {
         assertThat(found.getFirst().getId()).isNotNull();
         assertThat(found.getFirst().getCaliber()).isEqualTo(caliber.getId());
         assertThat(found.getFirst().getManufacturer()).isEqualTo(manufacturer.getId());
+    }
+
+    @Test
+    void shouldSaveMeasuresInSiUnits() {
+        Caliber caliber = new Caliber();
+        caliber.setName("6.5 Creedmoor");
+        caliber = caliberRepository.save(caliber);
+
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setName("Sako");
+        manufacturer = manufacturerRepository.save(manufacturer);
+
+        Rifle rifle = new Rifle();
+        rifle.setName("TRG 22");
+        rifle.setManufacturer(manufacturer.getId());
+        rifle.setCaliber(caliber.getId());
+        rifle.setBarrelLength(new BigDecimal("0.66"));
+        rifle.setLengthOfTwist(new BigDecimal("0.2032")); // 1:8"
+        sut.save(rifle);
+
+        Optional<Rifle> found = sut.findByName("TRG 22");
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getBarrelLength()).isEqualByComparingTo("0.66");
+        assertThat(found.get().getLengthOfTwist()).isEqualByComparingTo("0.2032");
     }
 }

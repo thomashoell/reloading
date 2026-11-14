@@ -20,6 +20,12 @@ To run the application, a PostgreSQL 18 database `reloading` (user and password 
 ./mvnw spring-boot:run
 ```
 
+## Data model
+
+Components are split into a product and its purchased lots (`casing`/`casing_lot`, `bullet`/`bullet_lot`, `powder`/`powder_lot`, `primer`/`primer_lot`). A `processed_case` is a batch of cases of one lot that were prepared the same way, a `load` a batch of cartridges made from such a batch and one lot of each component, and a `shooting_result` what a load did in a rifle.
+
+All measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K. Converting to and from grains, inches etc. is a concern of the user interface.
+
 ## Contributing
 
 Changes go through pull requests against `develop`, which are squash-merged. `develop` is the default branch until the application is usable; it is then merged to `main`, which publishes the first release. The PR title must be a [Conventional Commit](https://www.conventionalcommits.org/) (e.g. `feat: add primer entity`).
