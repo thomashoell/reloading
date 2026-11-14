@@ -1,8 +1,6 @@
 package de.tho.reloading.repository;
 
-import de.tho.reloading.entity.Caliber;
 import de.tho.reloading.entity.Rifle;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,10 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface RifleRepository extends CrudRepository<Rifle, UUID> {
-    Optional<Rifle> findByName(String name);
+public interface RifleRepository extends OwnedRepository<Rifle> {
 
-    List<Rifle> findByManufacturer(UUID manufacturer);
+    Optional<Rifle> findByOwnerAndName(UUID owner, String name);
 
-    List<Rifle> findByCaliber(UUID caliber);
+    List<Rifle> findByOwnerAndManufacturer(UUID owner, UUID manufacturer);
+
+    List<Rifle> findByOwnerAndCaliber(UUID owner, UUID caliber);
 }

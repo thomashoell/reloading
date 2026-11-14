@@ -1,3 +1,4 @@
+# casing: master data; casing_lot: user data
 databaseChangeLog:
   - changeSet:
       id: 20260216-1135-create-casing
@@ -46,6 +47,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_casing_lot_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: casing
                   type: uuid
                   constraints:
@@ -60,8 +69,13 @@ databaseChangeLog:
                     nullable: false
         - addUniqueConstraint:
             tableName: casing_lot
-            columnNames: casing, lot_number
-            constraintName: uk_casing_lot_casing_lot_number
+            columnNames: owner, casing, lot_number
+            constraintName: uk_casing_lot_owner_casing_lot_number
+            validate: true
+        - addUniqueConstraint:
+            tableName: casing_lot
+            columnNames: id, owner
+            constraintName: uk_casing_lot_id_owner
             validate: true
         - sql:
             sql: "ALTER TABLE casing_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

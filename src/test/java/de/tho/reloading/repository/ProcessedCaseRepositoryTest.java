@@ -1,5 +1,6 @@
 package de.tho.reloading.repository;
 
+import de.tho.reloading.entity.AppUser;
 import de.tho.reloading.entity.ProcessedCase;
 import de.tho.reloading.entity.Rifle;
 import de.tho.reloading.utility.Calibration;
@@ -52,7 +53,7 @@ public class ProcessedCaseRepositoryTest {
 
         sut.save(processedCase);
 
-        List<ProcessedCase> found = sut.findByCasingLot(processedCase.getCasingLot());
+        List<ProcessedCase> found = sut.findByOwnerAndCasingLot(processedCase.getOwner(), processedCase.getCasingLot());
 
         assertThat(found).hasSize(1);
         ProcessedCase actual = found.getFirst();
@@ -74,7 +75,7 @@ public class ProcessedCaseRepositoryTest {
     void shouldSaveMinimalProcessedCase() {
         ProcessedCase saved = data.processedCase();
 
-        ProcessedCase actual = sut.findById(saved.getId()).orElseThrow();
+        ProcessedCase actual = sut.findByIdAndOwner(saved.getId(), saved.getOwner()).orElseThrow();
         assertThat(actual.getTimesFired()).isZero();
         assertThat(actual.getFiredFrom()).isNull();
         assertThat(actual.getCalibrationMethod()).isNull();
@@ -89,7 +90,7 @@ public class ProcessedCaseRepositoryTest {
         processedCase.setFiredFrom(rifle.getId());
         sut.save(processedCase);
 
-        assertThat(sut.findByFiredFrom(rifle.getId())).hasSize(1);
+        assertThat(sut.findByOwnerAndFiredFrom(rifle.getOwner(), rifle.getId())).hasSize(1);
     }
 
     @Test
@@ -130,5 +131,36 @@ public class ProcessedCaseRepositoryTest {
         assertThatThrownBy(() -> sut.save(processedCase))
                 .isInstanceOf(DataIntegrityViolationException.class)
                 .hasMessageContaining("ck_processed_case_mandrel_diameter");
+    }
+
+    @Test
+    void shouldHideProcessedCasesOfOtherUsers() {
+        ProcessedCase processedCase = data.processedCase();
+        AppUser other = data.otherOwner();
+
+        assertThat(sut.findByOwner(processedCase.getOwner())).hasSize(1);
+        assertThat(sut.findByOwner(other.getId())).isEmpty();
+        assertThat(sut.findByIdAndOwner(processedCase.getId(), other.getId())).isEmpty();
+    }
+
+    @Test
+    void shouldRejectCasingLotOfAnotherOwner() {
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setOwner(data.otherOwner().getId());
+
+        assertThatThrownBy(() -> sut.save(processedCase))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("fk_processed_case_casing_lot");
+    }
+
+    @Test
+    void shouldRejectRifleOfAnotherOwner() {
+        ProcessedCase processedCase = data.newProcessedCase();
+        processedCase.setTimesFired(1);
+        processedCase.setFiredFrom(data.rifle(data.otherOwner()).getId());
+
+        assertThatThrownBy(() -> sut.save(processedCase))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("fk_processed_case_rifle");
     }
 }

@@ -1,7 +1,6 @@
 package de.tho.reloading.repository;
 
 import de.tho.reloading.entity.BulletLot;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,9 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface BulletLotRepository extends CrudRepository<BulletLot, UUID> {
+public interface BulletLotRepository extends OwnedRepository<BulletLot> {
 
-    List<BulletLot> findByBullet(UUID bullet);
+    List<BulletLot> findByOwnerAndBullet(UUID owner, UUID bullet);
 
-    Optional<BulletLot> findByBulletAndLotNumber(UUID bullet, String lotNumber);
+    Optional<BulletLot> findByOwnerAndBulletAndLotNumber(UUID owner, UUID bullet, String lotNumber);
 }

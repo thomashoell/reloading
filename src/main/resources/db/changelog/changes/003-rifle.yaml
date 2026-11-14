@@ -1,3 +1,4 @@
+# user data: every row belongs to one user (owner) and is only visible to that user
 # measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
@@ -15,6 +16,14 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+              - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rifle_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
               - column:
                   name: name
                   type: text
@@ -44,8 +53,13 @@ databaseChangeLog:
                     referencedColumnNames: id
         - addUniqueConstraint:
             tableName: rifle
-            columnNames: manufacturer, name, caliber
-            constraintName: uk_rifle_manufacturer_name_caliber
+            columnNames: owner, manufacturer, name, caliber
+            constraintName: uk_rifle_owner_manufacturer_name_caliber
+            validate: true
+        - addUniqueConstraint:
+            tableName: rifle
+            columnNames: id, owner
+            constraintName: uk_rifle_id_owner
             validate: true
         - sql:
             sql: "ALTER TABLE rifle ALTER COLUMN name TYPE text COLLATE case_insensitive;"

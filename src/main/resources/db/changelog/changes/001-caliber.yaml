@@ -1,3 +1,4 @@
+# master data: visible to every user, changed by administrators only
 databaseChangeLog:
   - changeSet:
       id: 20260216-1000-create-caliber

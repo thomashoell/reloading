@@ -1,4 +1,5 @@
 # a batch of cases of one lot that were prepared the same way
+# user data: every row belongs to one user (owner) and is only visible to that user
 # measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
@@ -17,13 +18,18 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_processed_case_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: casing_lot
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_processed_case_casing_lot
-                    referencedTableName: casing_lot
-                    referencedColumnNames: id
               - column:
                   name: quantity
                   type: integer
@@ -42,10 +48,6 @@ databaseChangeLog:
               - column:
                   name: fired_from
                   type: uuid
-                  constraints:
-                    foreignKeyName: fk_processed_case_rifle
-                    referencedTableName: rifle
-                    referencedColumnNames: id
               - column:
                   name: is_trimmed
                   type: boolean
@@ -71,6 +73,19 @@ databaseChangeLog:
               - column:
                   name: mandrel_diameter
                   type: numeric
+        - addUniqueConstraint:
+            tableName: processed_case
+            columnNames: id, owner
+            constraintName: uk_processed_case_id_owner
+            validate: true
+        - sql:
+            comment: "the referenced rows must belong to the same owner"
+            sql: >
+              ALTER TABLE processed_case
+                ADD CONSTRAINT fk_processed_case_casing_lot
+                  FOREIGN KEY (casing_lot, owner) REFERENCES casing_lot (id, owner),
+                ADD CONSTRAINT fk_processed_case_rifle
+                  FOREIGN KEY (fired_from, owner) REFERENCES rifle (id, owner);
         - sql:
             sql: >
               ALTER TABLE processed_case

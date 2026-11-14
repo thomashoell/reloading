@@ -1,0 +1,42 @@
+# users of the application; subject is the stable identifier from the identity provider (OIDC sub)
+databaseChangeLog:
+  - changeSet:
+      id: 20261114-1200-create-app-user
+      author: tho
+
+      changes:
+        - sql:
+            sql: "CREATE TYPE user_role AS ENUM ('ADMIN', 'USER');"
+        - sql:
+            comment: "Spring Data JDBC binds enums as varchar; let PostgreSQL cast them to the native enum type"
+            sql: "CREATE CAST (varchar AS user_role) WITH INOUT AS IMPLICIT;"
+        - createTable:
+            tableName: app_user
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: subject
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: user_role
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: app_user
+            columnNames: subject
+            constraintName: uk_app_user_subject
+            validate: true

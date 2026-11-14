@@ -1,16 +1,15 @@
 package de.tho.reloading.repository;
 
 import de.tho.reloading.entity.ShootingResult;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ShootingResultRepository extends CrudRepository<ShootingResult, UUID> {
+public interface ShootingResultRepository extends OwnedRepository<ShootingResult> {
 
-    List<ShootingResult> findByLoad(UUID load);
+    List<ShootingResult> findByOwnerAndLoad(UUID owner, UUID load);
 
-    List<ShootingResult> findByRifle(UUID rifle);
+    List<ShootingResult> findByOwnerAndRifle(UUID owner, UUID rifle);
 }

@@ -42,6 +42,7 @@ public class ShootingResultRepositoryTest {
         Rifle rifle = data.rifle();
         Load load = data.load();
         ShootingResult result = new ShootingResult();
+        result.setOwner(data.owner().getId());
         result.setLoad(load.getId());
         result.setRifle(rifle.getId());
         result.setShotOn(LocalDate.of(2026, 11, 14));
@@ -56,7 +57,7 @@ public class ShootingResultRepositoryTest {
 
         sut.save(result);
 
-        List<ShootingResult> found = sut.findByLoad(load.getId());
+        List<ShootingResult> found = sut.findByOwnerAndLoad(load.getOwner(), load.getId());
 
         assertThat(found).hasSize(1);
         ShootingResult actual = found.getFirst();
@@ -77,12 +78,13 @@ public class ShootingResultRepositoryTest {
     void shouldSaveMinimalResultAndFindByRifle() {
         Rifle rifle = data.rifle();
         ShootingResult result = new ShootingResult();
+        result.setOwner(data.owner().getId());
         result.setLoad(data.load().getId());
         result.setRifle(rifle.getId());
         result.setShotOn(LocalDate.of(2026, 11, 14));
         sut.save(result);
 
-        List<ShootingResult> found = sut.findByRifle(rifle.getId());
+        List<ShootingResult> found = sut.findByOwnerAndRifle(rifle.getOwner(), rifle.getId());
 
         assertThat(found).hasSize(1);
         assertThat(found.getFirst().getVelocityMean()).isNull();
@@ -92,6 +94,7 @@ public class ShootingResultRepositoryTest {
     @Test
     void shouldRejectNegativeStandardDeviation() {
         ShootingResult result = new ShootingResult();
+        result.setOwner(data.owner().getId());
         result.setLoad(data.load().getId());
         result.setRifle(data.rifle().getId());
         result.setShotOn(LocalDate.of(2026, 11, 14));
@@ -100,5 +103,18 @@ public class ShootingResultRepositoryTest {
         assertThatThrownBy(() -> sut.save(result))
                 .isInstanceOf(DataIntegrityViolationException.class)
                 .hasMessageContaining("ck_shooting_result_velocity_sd");
+    }
+
+    @Test
+    void shouldRejectLoadOfAnotherOwner() {
+        ShootingResult result = new ShootingResult();
+        result.setOwner(data.otherOwner().getId());
+        result.setLoad(data.load().getId());
+        result.setRifle(data.rifle(data.otherOwner()).getId());
+        result.setShotOn(LocalDate.of(2026, 11, 14));
+
+        assertThatThrownBy(() -> sut.save(result))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("fk_shooting_result_load");
     }
 }

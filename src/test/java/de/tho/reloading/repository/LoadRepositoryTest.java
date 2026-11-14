@@ -1,5 +1,6 @@
 package de.tho.reloading.repository;
 
+import de.tho.reloading.entity.AppUser;
 import de.tho.reloading.entity.Load;
 import de.tho.reloading.entity.Rifle;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class LoadRepositoryTest {
 
         sut.save(load);
 
-        List<Load> found = sut.findByProcessedCase(load.getProcessedCase());
+        List<Load> found = sut.findByOwnerAndProcessedCase(load.getOwner(), load.getProcessedCase());
 
         assertThat(found).hasSize(1);
         Load actual = found.getFirst();
@@ -67,9 +68,9 @@ public class LoadRepositoryTest {
     void shouldFindByComponentLots() {
         Load load = data.load();
 
-        assertThat(sut.findByBulletLot(load.getBulletLot())).hasSize(1);
-        assertThat(sut.findByPowderLot(load.getPowderLot())).hasSize(1);
-        assertThat(sut.findByPrimerLot(load.getPrimerLot())).hasSize(1);
+        assertThat(sut.findByOwnerAndBulletLot(load.getOwner(), load.getBulletLot())).hasSize(1);
+        assertThat(sut.findByOwnerAndPowderLot(load.getOwner(), load.getPowderLot())).hasSize(1);
+        assertThat(sut.findByOwnerAndPrimerLot(load.getOwner(), load.getPrimerLot())).hasSize(1);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class LoadRepositoryTest {
         load.setRifle(rifle.getId());
         sut.save(load);
 
-        assertThat(sut.findByRifle(rifle.getId())).hasSize(1);
+        assertThat(sut.findByOwnerAndRifle(rifle.getOwner(), rifle.getId())).hasSize(1);
     }
 
     @Test
@@ -99,5 +100,35 @@ public class LoadRepositoryTest {
 
         assertThatThrownBy(() -> sut.save(load))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void shouldHideLoadsOfOtherUsers() {
+        Load load = data.load();
+        AppUser other = data.otherOwner();
+
+        assertThat(sut.findByOwner(load.getOwner())).hasSize(1);
+        assertThat(sut.findByOwner(other.getId())).isEmpty();
+        assertThat(sut.findByIdAndOwner(load.getId(), other.getId())).isEmpty();
+    }
+
+    @Test
+    void shouldRejectComponentsOfAnotherOwner() {
+        Load load = data.newLoad();
+        load.setOwner(data.otherOwner().getId());
+
+        assertThatThrownBy(() -> sut.save(load))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("fk_load_");
+    }
+
+    @Test
+    void shouldRejectRifleOfAnotherOwner() {
+        Load load = data.newLoad();
+        load.setRifle(data.rifle(data.otherOwner()).getId());
+
+        assertThatThrownBy(() -> sut.save(load))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("fk_load_rifle");
     }
 }

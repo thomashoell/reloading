@@ -21,6 +21,9 @@ public class ShootingResult {
     @Id
     private UUID id;
 
+    // the app_user this row belongs to
+    private UUID owner;
+
     private UUID load;
     private UUID rifle;
     private LocalDate shotOn;

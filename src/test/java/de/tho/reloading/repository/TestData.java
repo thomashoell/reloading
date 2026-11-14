@@ -1,5 +1,6 @@
 package de.tho.reloading.repository;
 
+import de.tho.reloading.entity.AppUser;
 import de.tho.reloading.entity.Bullet;
 import de.tho.reloading.entity.BulletLot;
 import de.tho.reloading.entity.Caliber;
@@ -14,6 +15,7 @@ import de.tho.reloading.entity.PrimerLot;
 import de.tho.reloading.entity.ProcessedCase;
 import de.tho.reloading.entity.Rifle;
 import de.tho.reloading.utility.PrimerSize;
+import de.tho.reloading.utility.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -21,8 +23,9 @@ import java.time.LocalDate;
 
 /**
  * Saved entities for the repository tests ({@code @Import(TestData.class)}).
- * Manufacturers and calibers are reused by name; every other method creates a new row, so calling the same
- * method twice in one test violates the unique constraints.
+ * Users, manufacturers, calibers and the casing are reused; every other method creates a new row, so calling
+ * the same method twice in one test violates the unique constraints.
+ * User data belongs to {@link #owner()} unless stated otherwise.
  * All measures are SI base units (m, kg).
  */
 public class TestData {
@@ -34,6 +37,8 @@ public class TestData {
     public static final BigDecimal POWDER_CHARGE = new BigDecimal("0.002689154765"); // 41.5 gr
     public static final BigDecimal OVERALL_LENGTH = new BigDecimal("0.0712");
 
+    @Autowired
+    private AppUserRepository appUserRepository;
     @Autowired
     private ManufacturerRepository manufacturerRepository;
     @Autowired
@@ -61,6 +66,24 @@ public class TestData {
     @Autowired
     private LoadRepository loadRepository;
 
+    public AppUser user(String subject) {
+        return appUserRepository.findBySubject(subject).orElseGet(() -> {
+            AppUser user = new AppUser();
+            user.setSubject(subject);
+            user.setUsername(subject);
+            user.setRole(UserRole.USER);
+            return appUserRepository.save(user);
+        });
+    }
+
+    public AppUser owner() {
+        return user("owner");
+    }
+
+    public AppUser otherOwner() {
+        return user("other-owner");
+    }
+
     public Manufacturer manufacturer(String name) {
         return manufacturerRepository.findByName(name).orElseGet(() -> {
             Manufacturer manufacturer = new Manufacturer();
@@ -82,7 +105,12 @@ public class TestData {
     }
 
     public Rifle rifle() {
+        return rifle(owner());
+    }
+
+    public Rifle rifle(AppUser owner) {
         Rifle rifle = new Rifle();
+        rifle.setOwner(owner.getId());
         rifle.setName("TRG 22");
         rifle.setManufacturer(manufacturer("Sako").getId());
         rifle.setCaliber(caliber().getId());
@@ -90,14 +118,22 @@ public class TestData {
     }
 
     public Casing casing() {
-        Casing casing = new Casing();
-        casing.setManufacturer(manufacturer("Lapua").getId());
-        casing.setCaliber(caliber().getId());
-        return casingRepository.save(casing);
+        Manufacturer manufacturer = manufacturer("Lapua");
+        return casingRepository.findByManufacturer(manufacturer.getId()).stream().findFirst().orElseGet(() -> {
+            Casing casing = new Casing();
+            casing.setManufacturer(manufacturer.getId());
+            casing.setCaliber(caliber().getId());
+            return casingRepository.save(casing);
+        });
     }
 
     public CasingLot casingLot() {
+        return casingLot(owner());
+    }
+
+    public CasingLot casingLot(AppUser owner) {
         CasingLot lot = new CasingLot();
+        lot.setOwner(owner.getId());
         lot.setCasing(casing().getId());
         lot.setLotNumber("C-0001");
         return casingLotRepository.save(lot);
@@ -119,6 +155,7 @@ public class TestData {
 
     public BulletLot bulletLot() {
         BulletLot lot = new BulletLot();
+        lot.setOwner(owner().getId());
         lot.setBullet(bullet().getId());
         lot.setLotNumber("B-0001");
         return bulletLotRepository.save(lot);
@@ -133,6 +170,7 @@ public class TestData {
 
     public PowderLot powderLot() {
         PowderLot lot = new PowderLot();
+        lot.setOwner(owner().getId());
         lot.setPowder(powder().getId());
         lot.setLotNumber("P-0001");
         return powderLotRepository.save(lot);
@@ -148,6 +186,7 @@ public class TestData {
 
     public PrimerLot primerLot() {
         PrimerLot lot = new PrimerLot();
+        lot.setOwner(owner().getId());
         lot.setPrimer(primer().getId());
         lot.setLotNumber("Z-0001");
         return primerLotRepository.save(lot);
@@ -156,6 +195,7 @@ public class TestData {
     /** Not saved: 50 new, untrimmed cases of a new casing lot. */
     public ProcessedCase newProcessedCase() {
         ProcessedCase processedCase = new ProcessedCase();
+        processedCase.setOwner(owner().getId());
         processedCase.setCasingLot(casingLot().getId());
         processedCase.setQuantity(50);
         processedCase.setProcessedOn(LocalDate.of(2026, 11, 1));
@@ -172,6 +212,7 @@ public class TestData {
     /** Not saved: 20 cartridges made of new lots of every component. */
     public Load newLoad() {
         Load load = new Load();
+        load.setOwner(owner().getId());
         load.setProcessedCase(processedCase().getId());
         load.setBulletLot(bulletLot().getId());
         load.setPowderLot(powderLot().getId());

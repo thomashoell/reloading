@@ -1,5 +1,6 @@
 package de.tho.reloading.repository;
 
+import de.tho.reloading.entity.AppUser;
 import de.tho.reloading.entity.BulletLot;
 import de.tho.reloading.entity.CasingLot;
 import de.tho.reloading.entity.PowderLot;
@@ -50,8 +51,8 @@ public class LotRepositoriesTest {
         CasingLot lot = data.casingLot();
 
         assertThat(lot.getId()).isNotNull();
-        assertThat(casingLotRepository.findByCasing(lot.getCasing())).hasSize(1);
-        Optional<CasingLot> found = casingLotRepository.findByCasingAndLotNumber(lot.getCasing(), "c-0001");
+        assertThat(casingLotRepository.findByOwnerAndCasing(lot.getOwner(), lot.getCasing())).hasSize(1);
+        Optional<CasingLot> found = casingLotRepository.findByOwnerAndCasingAndLotNumber(lot.getOwner(), lot.getCasing(), "c-0001");
         assertThat(found).isPresent();
         assertThat(found.get().getLotNumber()).isEqualTo("C-0001");
     }
@@ -61,8 +62,8 @@ public class LotRepositoriesTest {
         BulletLot lot = data.bulletLot();
 
         assertThat(lot.getId()).isNotNull();
-        assertThat(bulletLotRepository.findByBullet(lot.getBullet())).hasSize(1);
-        assertThat(bulletLotRepository.findByBulletAndLotNumber(lot.getBullet(), "b-0001")).isPresent();
+        assertThat(bulletLotRepository.findByOwnerAndBullet(lot.getOwner(), lot.getBullet())).hasSize(1);
+        assertThat(bulletLotRepository.findByOwnerAndBulletAndLotNumber(lot.getOwner(), lot.getBullet(), "b-0001")).isPresent();
     }
 
     @Test
@@ -70,8 +71,8 @@ public class LotRepositoriesTest {
         PowderLot lot = data.powderLot();
 
         assertThat(lot.getId()).isNotNull();
-        assertThat(powderLotRepository.findByPowder(lot.getPowder())).hasSize(1);
-        assertThat(powderLotRepository.findByPowderAndLotNumber(lot.getPowder(), "p-0001")).isPresent();
+        assertThat(powderLotRepository.findByOwnerAndPowder(lot.getOwner(), lot.getPowder())).hasSize(1);
+        assertThat(powderLotRepository.findByOwnerAndPowderAndLotNumber(lot.getOwner(), lot.getPowder(), "p-0001")).isPresent();
     }
 
     @Test
@@ -79,36 +80,59 @@ public class LotRepositoriesTest {
         PrimerLot lot = data.primerLot();
 
         assertThat(lot.getId()).isNotNull();
-        assertThat(primerLotRepository.findByPrimer(lot.getPrimer())).hasSize(1);
-        assertThat(primerLotRepository.findByPrimerAndLotNumber(lot.getPrimer(), "z-0001")).isPresent();
+        assertThat(primerLotRepository.findByOwnerAndPrimer(lot.getOwner(), lot.getPrimer())).hasSize(1);
+        assertThat(primerLotRepository.findByOwnerAndPrimerAndLotNumber(lot.getOwner(), lot.getPrimer(), "z-0001")).isPresent();
     }
 
     @Test
     void shouldAllowSeveralLotsOfOneProduct() {
         CasingLot lot = data.casingLot();
         CasingLot second = new CasingLot();
+        second.setOwner(lot.getOwner());
         second.setCasing(lot.getCasing());
         second.setLotNumber("C-0002");
         casingLotRepository.save(second);
 
-        assertThat(casingLotRepository.findByCasing(lot.getCasing())).hasSize(2);
+        assertThat(casingLotRepository.findByOwnerAndCasing(lot.getOwner(), lot.getCasing())).hasSize(2);
+    }
+
+    @Test
+    void shouldHideLotsOfOtherUsers() {
+        CasingLot lot = data.casingLot();
+        AppUser other = data.otherOwner();
+
+        assertThat(casingLotRepository.findByOwner(lot.getOwner())).hasSize(1);
+        assertThat(casingLotRepository.findByOwner(other.getId())).isEmpty();
+        assertThat(casingLotRepository.findByIdAndOwner(lot.getId(), other.getId())).isEmpty();
+        assertThat(casingLotRepository.findByOwnerAndCasing(other.getId(), lot.getCasing())).isEmpty();
+    }
+
+    @Test
+    void shouldAllowTheSameLotNumberForDifferentOwners() {
+        CasingLot lot = data.casingLot();
+        CasingLot sameLotOfOther = data.casingLot(data.otherOwner());
+
+        assertThat(sameLotOfOther.getLotNumber()).isEqualTo(lot.getLotNumber());
+        assertThat(casingLotRepository.findByOwner(sameLotOfOther.getOwner())).hasSize(1);
     }
 
     @Test
     void shouldRejectDuplicateLotNumberIgnoringCase() {
         CasingLot lot = data.casingLot();
         CasingLot duplicate = new CasingLot();
+        duplicate.setOwner(lot.getOwner());
         duplicate.setCasing(lot.getCasing());
         duplicate.setLotNumber("c-0001");
 
         assertThatThrownBy(() -> casingLotRepository.save(duplicate))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("uk_casing_lot_casing_lot_number");
+                .hasMessageContaining("uk_casing_lot_owner_casing_lot_number");
     }
 
     @Test
     void shouldRejectLotWithoutLotNumber() {
         PowderLot lot = new PowderLot();
+        lot.setOwner(data.owner().getId());
         lot.setPowder(data.powder().getId());
 
         assertThatThrownBy(() -> powderLotRepository.save(lot))

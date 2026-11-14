@@ -1,3 +1,4 @@
+# user data: every row belongs to one user (owner) and is only visible to that user
 # measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
@@ -16,21 +17,23 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_shooting_result_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: load
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_shooting_result_load
-                    referencedTableName: load
-                    referencedColumnNames: id
               - column:
                   name: rifle
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_shooting_result_rifle
-                    referencedTableName: rifle
-                    referencedColumnNames: id
               - column:
                   name: shot_on
                   type: date
@@ -60,6 +63,14 @@ databaseChangeLog:
               - column:
                   name: notes
                   type: text
+        - sql:
+            comment: "the referenced rows must belong to the same owner"
+            sql: >
+              ALTER TABLE shooting_result
+                ADD CONSTRAINT fk_shooting_result_load
+                  FOREIGN KEY (load, owner) REFERENCES load (id, owner),
+                ADD CONSTRAINT fk_shooting_result_rifle
+                  FOREIGN KEY (rifle, owner) REFERENCES rifle (id, owner);
         - sql:
             sql: >
               ALTER TABLE shooting_result
