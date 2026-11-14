@@ -1,7 +1,6 @@
 package de.tho.reloading.repository;
 
 import de.tho.reloading.entity.CasingLot;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,9 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CasingLotRepository extends CrudRepository<CasingLot, UUID> {
+public interface CasingLotRepository extends OwnedRepository<CasingLot> {
 
-    List<CasingLot> findByCasing(UUID casing);
+    List<CasingLot> findByOwnerAndCasing(UUID owner, UUID casing);
 
-    Optional<CasingLot> findByCasingAndLotNumber(UUID casing, String lotNumber);
+    Optional<CasingLot> findByOwnerAndCasingAndLotNumber(UUID owner, UUID casing, String lotNumber);
 }

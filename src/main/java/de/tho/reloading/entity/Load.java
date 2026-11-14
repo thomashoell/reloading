@@ -21,6 +21,9 @@ public class Load {
     @Id
     private UUID id;
 
+    // the app_user this row belongs to
+    private UUID owner;
+
     private UUID processedCase;
     private UUID bulletLot;
     private UUID powderLot;

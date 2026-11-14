@@ -1,3 +1,4 @@
+# powder: master data; powder_lot: user data
 databaseChangeLog:
   - changeSet:
       id: 20260216-1407-create-powder
@@ -45,6 +46,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_powder_lot_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: powder
                   type: uuid
                   constraints:
@@ -59,8 +68,13 @@ databaseChangeLog:
                     nullable: false
         - addUniqueConstraint:
             tableName: powder_lot
-            columnNames: powder, lot_number
-            constraintName: uk_powder_lot_powder_lot_number
+            columnNames: owner, powder, lot_number
+            constraintName: uk_powder_lot_owner_powder_lot_number
+            validate: true
+        - addUniqueConstraint:
+            tableName: powder_lot
+            columnNames: id, owner
+            constraintName: uk_powder_lot_id_owner
             validate: true
         - sql:
             sql: "ALTER TABLE powder_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

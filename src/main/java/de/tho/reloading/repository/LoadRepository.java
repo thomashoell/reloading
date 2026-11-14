@@ -1,22 +1,21 @@
 package de.tho.reloading.repository;
 
 import de.tho.reloading.entity.Load;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface LoadRepository extends CrudRepository<Load, UUID> {
+public interface LoadRepository extends OwnedRepository<Load> {
 
-    List<Load> findByProcessedCase(UUID processedCase);
+    List<Load> findByOwnerAndProcessedCase(UUID owner, UUID processedCase);
 
-    List<Load> findByBulletLot(UUID bulletLot);
+    List<Load> findByOwnerAndBulletLot(UUID owner, UUID bulletLot);
 
-    List<Load> findByPowderLot(UUID powderLot);
+    List<Load> findByOwnerAndPowderLot(UUID owner, UUID powderLot);
 
-    List<Load> findByPrimerLot(UUID primerLot);
+    List<Load> findByOwnerAndPrimerLot(UUID owner, UUID primerLot);
 
-    List<Load> findByRifle(UUID rifle);
+    List<Load> findByOwnerAndRifle(UUID owner, UUID rifle);
 }

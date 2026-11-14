@@ -1,4 +1,5 @@
 # a batch of cartridges loaded with the same components and the same data
+# user data: every row belongs to one user (owner) and is only visible to that user
 # measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
@@ -17,37 +18,33 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_load_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: processed_case
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_load_processed_case
-                    referencedTableName: processed_case
-                    referencedColumnNames: id
               - column:
                   name: bullet_lot
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_load_bullet_lot
-                    referencedTableName: bullet_lot
-                    referencedColumnNames: id
               - column:
                   name: powder_lot
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_load_powder_lot
-                    referencedTableName: powder_lot
-                    referencedColumnNames: id
               - column:
                   name: primer_lot
                   type: uuid
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_load_primer_lot
-                    referencedTableName: primer_lot
-                    referencedColumnNames: id
               - column:
                   name: powder_charge
                   type: numeric
@@ -74,13 +71,28 @@ databaseChangeLog:
               - column:
                   name: rifle
                   type: uuid
-                  constraints:
-                    foreignKeyName: fk_load_rifle
-                    referencedTableName: rifle
-                    referencedColumnNames: id
               - column:
                   name: notes
                   type: text
+        - addUniqueConstraint:
+            tableName: load
+            columnNames: id, owner
+            constraintName: uk_load_id_owner
+            validate: true
+        - sql:
+            comment: "the referenced rows must belong to the same owner"
+            sql: >
+              ALTER TABLE load
+                ADD CONSTRAINT fk_load_processed_case
+                  FOREIGN KEY (processed_case, owner) REFERENCES processed_case (id, owner),
+                ADD CONSTRAINT fk_load_bullet_lot
+                  FOREIGN KEY (bullet_lot, owner) REFERENCES bullet_lot (id, owner),
+                ADD CONSTRAINT fk_load_powder_lot
+                  FOREIGN KEY (powder_lot, owner) REFERENCES powder_lot (id, owner),
+                ADD CONSTRAINT fk_load_primer_lot
+                  FOREIGN KEY (primer_lot, owner) REFERENCES primer_lot (id, owner),
+                ADD CONSTRAINT fk_load_rifle
+                  FOREIGN KEY (rifle, owner) REFERENCES rifle (id, owner);
         - sql:
             sql: >
               ALTER TABLE load

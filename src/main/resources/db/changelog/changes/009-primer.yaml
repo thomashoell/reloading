@@ -1,3 +1,4 @@
+# primer: master data; primer_lot: user data
 databaseChangeLog:
   - changeSet:
       id: 20261114-1100-create-primer
@@ -55,6 +56,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_primer_lot_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: primer
                   type: uuid
                   constraints:
@@ -69,8 +78,13 @@ databaseChangeLog:
                     nullable: false
         - addUniqueConstraint:
             tableName: primer_lot
-            columnNames: primer, lot_number
-            constraintName: uk_primer_lot_primer_lot_number
+            columnNames: owner, primer, lot_number
+            constraintName: uk_primer_lot_owner_primer_lot_number
+            validate: true
+        - addUniqueConstraint:
+            tableName: primer_lot
+            columnNames: id, owner
+            constraintName: uk_primer_lot_id_owner
             validate: true
         - sql:
             sql: "ALTER TABLE primer_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

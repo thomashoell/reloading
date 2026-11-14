@@ -1,3 +1,4 @@
+# bullet: master data; bullet_lot: user data
 # measures are stored in SI base units: lengths in m, masses in kg, velocities in m/s, temperatures in K
 databaseChangeLog:
   - changeSet:
@@ -68,6 +69,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: owner
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_bullet_lot_owner
+                    referencedTableName: app_user
+                    referencedColumnNames: id
+              - column:
                   name: bullet
                   type: uuid
                   constraints:
@@ -82,8 +91,13 @@ databaseChangeLog:
                     nullable: false
         - addUniqueConstraint:
             tableName: bullet_lot
-            columnNames: bullet, lot_number
-            constraintName: uk_bullet_lot_bullet_lot_number
+            columnNames: owner, bullet, lot_number
+            constraintName: uk_bullet_lot_owner_bullet_lot_number
+            validate: true
+        - addUniqueConstraint:
+            tableName: bullet_lot
+            columnNames: id, owner
+            constraintName: uk_bullet_lot_id_owner
             validate: true
         - sql:
             sql: "ALTER TABLE bullet_lot ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

@@ -23,6 +23,9 @@ public class ProcessedCase {
     @Id
     private UUID id;
 
+    // the app_user this row belongs to
+    private UUID owner;
+
     private UUID casingLot;
     private Integer quantity;
     private LocalDate processedOn;
