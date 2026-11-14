@@ -1,0 +1,20 @@
+# Merged with (and taking precedence over) src/main/resources/application.yaml in tests.
+# A client registration with explicit endpoints instead of an issuer-uri: nothing is fetched from an
+# identity provider when the application context starts.
+spring:
+  config:
+    activate:
+      on-profile: "!noauth"
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: reloading-test
+            client-secret: test-secret
+        provider:
+          keycloak:
+            authorization-uri: https://idp.invalid/auth
+            token-uri: https://idp.invalid/token
+            jwk-set-uri: https://idp.invalid/certs
+            user-info-uri: https://idp.invalid/userinfo

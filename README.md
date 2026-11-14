@@ -16,8 +16,18 @@ Requirements: Java 25, Docker (the tests start PostgreSQL 18 with Testcontainers
 
 To run the application, a PostgreSQL 18 database `reloading` (user and password `reloading`) is expected on `localhost:5432`, see [application.yaml](src/main/resources/application.yaml). The schema is created by Liquibase on startup.
 
+Without login, for local development only (every request runs as the user `developer`, the application only listens on `localhost`):
+
 ```
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=noauth
+```
+
+By default the application requires an OAuth2/OIDC login (e.g. Keycloak; redirect URI `<base URL>/login/oauth2/code/keycloak`) and doesn't start without these environment variables:
+
+```
+SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI=https://<keycloak>/realms/<realm>
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID=<client id>
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET=<client secret>
 ```
 
 ## Data model
