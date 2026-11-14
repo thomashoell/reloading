@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-1220-create-bullet
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: bullet
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lot_number
+                  type: text
+              - column:
+                  name: manufacturer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rifle_manufacturer
+                    referencedTableName: manufacturer
+                    referencedColumnNames: id
+              - column:
+                  name: caliber
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rifle_caliber
+                    referencedTableName: caliber
+                    referencedColumnNames: id
+              - column:
+                  name: length
+                  type: double precision
+              - column:
+                  name: weight
+                  type: double precision
+        - addUniqueConstraint:
+            tableName: bullet
+            columnNames: manufacturer, type, caliber, lot_number
+            constraintName: uk_bullet_manufacturer_type_caliber_lot_number
+            validate: true
+        - sql:
+            sql: "ALTER TABLE bullet ALTER COLUMN type TYPE text COLLATE case_insensitive;"
+        - sql:
+            sql: "ALTER TABLE bullet ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

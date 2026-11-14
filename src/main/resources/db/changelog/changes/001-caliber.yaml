@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-1000-create-caliber
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: caliber
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_caliber_name
+        - sql:
+            sql: "ALTER TABLE caliber ALTER COLUMN name TYPE text COLLATE case_insensitive;"

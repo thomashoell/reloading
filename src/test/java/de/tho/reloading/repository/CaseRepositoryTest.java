@@ -1,0 +1,65 @@
+package de.tho.reloading.repository;
+
+
+import de.tho.reloading.entity.Caliber;
+import de.tho.reloading.entity.Case;
+import de.tho.reloading.entity.Manufacturer;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jdbc.test.autoconfigure.DataJdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJdbcTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+public class CaseRepositoryTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18-alpine");
+
+    @Autowired
+    private CaliberRepository caliberRepository;
+
+    @Autowired
+    private ManufacturerRepository manufacturerRepository;
+
+    @Autowired
+    private CaseRepository sut;
+
+    @Test
+    void shouldSaveAndFindByCaliber() {
+        Caliber caliber = new Caliber();
+        caliber.setName(".30-06 Springfield");
+        caliber = caliberRepository.save(caliber);
+
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setName("Lapua");
+        manufacturer = manufacturerRepository.save(manufacturer);
+
+
+        Case bulletCase = new Case();
+        bulletCase.setCaliber(caliber.getId());
+        bulletCase.setManufacturer(manufacturer.getId());
+        bulletCase.setLotNumber("ABC1234");
+
+        sut.save(bulletCase);
+        List<Case> found = sut.findByManufacturer(manufacturer.getId());
+
+        assertThat(found).isNotEmpty();
+        assertThat(found.getFirst().getCaliber()).isEqualTo(caliber.getId());
+        assertThat(found.getFirst().getManufacturer()).isEqualTo(manufacturer.getId());
+        assertThat(found.getFirst().getLotNumber()).isEqualTo("ABC1234");
+    }
+}
+
+

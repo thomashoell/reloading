@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-1407-create-powder
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: powder
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lot_number
+                  type: text
+              - column:
+                  name: manufacturer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_powder_manufacturer
+                    referencedTableName: manufacturer
+                    referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: powder
+            columnNames: manufacturer, name, lot_number
+            constraintName: uk_powder_manufacturer_name_lot_number
+            validate: true
+        - sql:
+            sql: "ALTER TABLE powder ALTER COLUMN name TYPE text COLLATE case_insensitive;"
+        - sql:
+            sql: "ALTER TABLE powder ALTER COLUMN lot_number TYPE text COLLATE case_insensitive;"

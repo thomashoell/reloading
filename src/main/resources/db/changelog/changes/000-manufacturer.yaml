@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-0945-create-manufacturer
+      author: tho
+
+      changes:
+        - sql:
+            sql: CREATE COLLATION case_insensitive (provider = 'icu', locale = 'und-u-ks-level2', deterministic = false);
+            comment: "create case insensitive collation"
+        - createTable:
+            tableName: manufacturer
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()" # PostgreSQL native function
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_manufacturer_name
+        - sql:
+            sql: "ALTER TABLE manufacturer ALTER COLUMN name TYPE text COLLATE case_insensitive;"

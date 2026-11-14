@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: reloading
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reloading
+    username: reloading
+    password: reloading
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:db/changelog/master.yaml
+
+#logging:
+#  level:
+#    # This captures the general Liquibase activity
+#    liquibase: DEBUG
+#    # This is often needed to see the actual SQL being generated
+#    liquibase.executor: DEBUG
+#    # If you want to see exactly how it's reading your YAML/XML files
+#    liquibase.changelog: DEBUG

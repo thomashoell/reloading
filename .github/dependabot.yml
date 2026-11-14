@@ -1,0 +1,50 @@
+# Dependency updates. "daily" runs Monday to Friday.
+# Commit prefixes follow Conventional Commits:
+#   build(deps): ...  -> application dependencies
+#   ci(deps): ...     -> pipeline and tooling
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: daily
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: build
+      include: scope
+    groups:
+      # Spring Boot (parent POM) and the libraries it manages are released together
+      spring-boot:
+        patterns:
+          - org.springframework.boot:*
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # hook versions in .pre-commit-config.yaml; the CI lint job uses the same actionlint version
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: daily
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      pre-commit:
+        patterns:
+          - "*"

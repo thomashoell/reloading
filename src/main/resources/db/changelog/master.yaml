@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - preConditions:
+      - onFail: HALT
+        onError: HALT
+        onFailMessage: "CRITICAL: This project requires PostgreSQL 18 or higher for native uuidv7() support. Please upgrade your database."
+        sqlCheck:
+          expectedResult: 1
+          sql: "SELECT count(*) FROM pg_settings WHERE name = 'server_version_num' AND setting::int >= 180000"
+
+  - includeAll:
+      path: changes
+      relativeToChangelogFile: true

@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260224-1501-create-processed-case
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: processed_case
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: parent_case
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_processed_case_parent_case
+                    referencedTableName: bullet_casing
+                    referencedColumnNames: id
+              - column:
+                  name: is_fired
+                  type: boolean
+                  constraints:
+                    nullable: true
+              - column:
+                  name: fired_from
+                  type: uuid
+                  constraints:
+                    checkConstraint: "is_fired = false OR fired_from IS NOT NULL"
+                    foreignKeyName: fk_processed_case_rifle
+                    referencedTableName: rifle
+                    referencedColumnNames: id
+              - column:
+                  name: is_trimmed
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: case_length
+                  type: double precision
+                  constraints:
+                    nullable: false
+              - column:
+                  name: calibration_method
+                  type: calibration
+                  constraints:
+                    nullable: true
+              - column:
+                  name: calibration_die
+                  type: text
+                  constraints:
+                    checkConstraint: "calibration_method IS NULL OR calibration_die IS NOT NULL"
+              - column:
+                  name: bushing
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mandrel_used
+                  type: boolean
+                  constraints:
+                    nullable: true
+              - column:
+                  name: mandrel_diameter
+                  type: double precision
+                  constraints:
+                    checkConstraint: "mandrel_used = false OR mandrel_diameter IS NOT NULL"

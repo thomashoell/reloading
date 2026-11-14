@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-1115-create-rifle
+      author: tho
+
+      changes:
+        - createTable:
+            tableName: rifle
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "uuidv7()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: barrel_length
+                  type: bigint
+                  constraints:
+                    nullable: true
+              - column:
+                  name: length_of_twist
+                  type: bigint
+                  constraints:
+                    nullable: true
+              - column:
+                  name: manufacturer
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rifle_manufacturer
+                    referencedTableName: manufacturer
+                    referencedColumnNames: id
+              - column:
+                  name: caliber
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rifle_caliber
+                    referencedTableName: caliber
+                    referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: rifle
+            columnNames: manufacturer, name, caliber
+            constraintName: uk_rifle_manufacturer_name_caliber
+            validate: true
+        - sql:
+            sql: "ALTER TABLE rifle ALTER COLUMN name TYPE text COLLATE case_insensitive;"

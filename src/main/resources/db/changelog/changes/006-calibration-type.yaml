@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260224-1458-create-calibration-type
+      author: tho
+
+      changes:
+        - sql:
+            sql: "CREATE TYPE calibration AS ENUM ('FULL', 'NECK', 'SHOULDER_AND_NECK');"
