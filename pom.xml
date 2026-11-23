@@ -30,7 +30,7 @@
     <properties>
         <revision>0.0.0-SNAPSHOT</revision>
         <java.version>25</java.version>
-        <datasource-micrometer.version>2.3.0</datasource-micrometer.version>
+        <datasource-micrometer.version>2.3.1</datasource-micrometer.version>
     </properties>
     <dependencies>
         <dependency>
