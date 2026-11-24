@@ -31,6 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### release tooling (semantic-release) ###
-node_modules/
