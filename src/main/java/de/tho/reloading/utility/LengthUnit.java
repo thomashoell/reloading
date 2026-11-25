@@ -68,10 +68,15 @@ public enum LengthUnit {
      * millimeters with up to three decimal places, inches with up to two. Empty for null.
      */
     public static String formatMillimetersAndInches(BigDecimal si) {
+        return formatMillimetersAndInches(si, 2);
+    }
+
+    /** Like {@link #formatMillimetersAndInches(BigDecimal)} with this many decimal places for the inches. */
+    public static String formatMillimetersAndInches(BigDecimal si, int inchDecimalPlaces) {
         if (si == null) {
             return "";
         }
-        String inches = new BigDecimal(INCH.format(si, 2)).stripTrailingZeros().toPlainString();
+        String inches = new BigDecimal(INCH.format(si, inchDecimalPlaces)).stripTrailingZeros().toPlainString();
         return MILLIMETER.format(si) + " " + MILLIMETER.symbol + " (" + inches + " " + INCH.symbol + ")";
     }
 }

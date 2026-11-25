@@ -45,7 +45,7 @@ public class GlobalModel {
         if (path.startsWith("/settings")) {
             return "settings";
         }
-        if (path.startsWith("/rifles") || path.contains("-lots")) {
+        if (path.startsWith("/rifles") || path.contains("-lots") || path.startsWith("/processed-cases")) {
             return "mydata";
         }
         return MASTER_DATA_PATHS.stream().anyMatch(path::startsWith) ? "masterdata" : "";

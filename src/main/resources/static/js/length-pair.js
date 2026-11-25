@@ -4,6 +4,8 @@
  * Without JavaScript the millimeter field still works on its own.
  *
  * Markup: a container with data-length-pair holding <input data-unit="mm"> and <input data-unit="in">.
+ * Converted values are rounded to 2 decimals (mm) and 3 (in); fine measures can ask for more with
+ * data-mm-decimals and data-in-decimals on the container.
  */
 (function () {
     'use strict';
@@ -28,14 +30,21 @@
         target.value = tidy(number * factor, decimals);
     }
 
+    function decimals(pair, attribute, fallback) {
+        var number = parseInt(pair.getAttribute(attribute), 10);
+        return isNaN(number) ? fallback : number;
+    }
+
     function connect(pair) {
         var mm = pair.querySelector('[data-unit="mm"]');
         var inch = pair.querySelector('[data-unit="in"]');
         if (!mm || !inch) {
             return;
         }
-        var toInch = function () { convert(mm, inch, 1 / MM_PER_INCH, 3); };
-        var toMm = function () { convert(inch, mm, MM_PER_INCH, 2); };
+        var inchDecimals = decimals(pair, 'data-in-decimals', 3);
+        var mmDecimals = decimals(pair, 'data-mm-decimals', 2);
+        var toInch = function () { convert(mm, inch, 1 / MM_PER_INCH, inchDecimals); };
+        var toMm = function () { convert(inch, mm, MM_PER_INCH, mmDecimals); };
         mm.addEventListener('input', toInch);
         inch.addEventListener('input', toMm);
         // a value from the server (edit form, or a form sent back with errors) shows up in inches as well

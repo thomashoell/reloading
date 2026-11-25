@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Hülsenchargen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <header class="lb-pagehead lb-pagehead-actions">
+        <div>
+            <span class="lb-eyebrow">Meine Daten</span>
+            <h1>Hülsenchargen</h1>
+            <p class="lb-lead">Hülsen eines Loses, die du gleich vorbereitet hast. Nur du siehst sie.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/processed-cases/new}">Hülsencharge anlegen</a>
+    </header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <div class="lb-card lb-tablecard">
+        <div th:if="${page.empty}" class="lb-empty">
+            <p class="mb-3">Du hast noch keine Hülsencharge angelegt.</p>
+            <a class="btn btn-outline-primary" th:href="@{/processed-cases/new}">Erste Hülsencharge anlegen</a>
+        </div>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th scope="col">Datum</th>
+                    <th scope="col">Hülse</th>
+                    <th scope="col">Los</th>
+                    <th scope="col" class="text-end">Anzahl</th>
+                    <th scope="col" class="text-end">Verschossen</th>
+                    <th scope="col">Waffe</th>
+                    <th scope="col" class="text-end">Hülsenlänge</th>
+                    <th scope="col">Kalibrierung</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Aktionen</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${page.items}">
+                    <td class="text-nowrap" th:text="${row.processedOn}">01.11.2026</td>
+                    <td th:text="${row.casing}">casing</td>
+                    <td th:text="${row.lotNumber}">lot</td>
+                    <td class="text-end" th:text="${row.quantity}">50</td>
+                    <td class="text-end" th:text="|${row.timesFired}×|">2×</td>
+                    <td th:text="${row.rifle}">rifle</td>
+                    <td class="text-end text-nowrap">
+                        <span th:text="${row.caseLength}">48.51 mm (1.91 in)</span>
+                        <span class="badge text-bg-secondary ms-1" th:if="${row.trimmed}">getrimmt</span>
+                    </td>
+                    <td th:text="${row.calibration}">calibration</td>
+                    <td class="text-end">
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/processed-cases/{id}/edit(id=${row.id})}"
+                           th:attr="aria-label=|Charge vom ${row.processedOn}, Los ${row.lotNumber} bearbeiten|">Bearbeiten</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+        </div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>
