@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ladungen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <header class="lb-pagehead lb-pagehead-actions">
+        <div>
+            <span class="lb-eyebrow">Meine Daten</span>
+            <h1>Ladungen</h1>
+            <p class="lb-lead">Patronen, die du mit denselben Komponenten und Maßen geladen hast. Nur du siehst sie.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/loads/new}">Ladung anlegen</a>
+    </header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <div class="lb-card lb-tablecard">
+        <div th:if="${page.empty}" class="lb-empty">
+            <p class="mb-3">Du hast noch keine Ladung angelegt.</p>
+            <a class="btn btn-outline-primary" th:href="@{/loads/new}">Erste Ladung anlegen</a>
+        </div>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th scope="col">Datum</th>
+                    <th scope="col">Geschoss</th>
+                    <th scope="col">Pulver</th>
+                    <th scope="col" class="text-end">Ladung</th>
+                    <th scope="col">Zündhütchen</th>
+                    <th scope="col">Hülse</th>
+                    <th scope="col" class="text-end">Patronenlänge</th>
+                    <th scope="col" class="text-end">Anzahl</th>
+                    <th scope="col">Waffe</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Aktionen</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${page.items}">
+                    <td class="text-nowrap" th:text="${row.loadedOn}">01.11.2026</td>
+                    <td th:text="${row.bullet}">bullet</td>
+                    <td th:text="${row.powder}">powder</td>
+                    <td class="text-end text-nowrap" th:text="${row.powderCharge}">42.5 gr</td>
+                    <td th:text="${row.primer}">primer</td>
+                    <td th:text="${row.casing}">casing</td>
+                    <td class="text-end text-nowrap" th:text="${row.overallLength}">71.12 mm (2.8 in)</td>
+                    <td class="text-end" th:text="${row.quantity}">20</td>
+                    <td th:text="${row.rifle}">rifle</td>
+                    <td class="text-end">
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/loads/{id}/edit(id=${row.id})}"
+                           th:attr="aria-label=|Ladung vom ${row.loadedOn}, ${row.powderCharge} ${row.powder} bearbeiten|">Bearbeiten</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+        </div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

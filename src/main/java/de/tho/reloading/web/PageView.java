@@ -8,7 +8,9 @@ import java.util.Map;
 
 /**
  * One page of an already filtered and sorted list, with what a template needs for the pagination.
- * Master data is small and immutable, so the lists are paged in memory instead of in the database.
+ * Master data is small and immutable, so those lists are paged in memory, see {@link #of}.
+ * Lists that keep growing, like loads, are paged in the database: {@link #sizeOf} and {@link #numberOf} tell
+ * which rows to fetch, {@link #ofPage} wraps them.
  * Page numbers start at 1.
  */
 public final class PageView<T> {
@@ -45,20 +47,45 @@ public final class PageView<T> {
      * @param filters active filters, kept in the links to other pages; null and empty values are left out
      */
     public static <T> PageView<T> of(List<T> all, Integer page, Integer size, String path, Map<String, ?> filters) {
-        int pageSize = size == null || size < 1 ? DEFAULT_SIZE : Math.min(size, MAX_SIZE);
+        int pageSize = sizeOf(size);
         int totalItems = all.size();
-        int totalPages = Math.max(1, (totalItems + pageSize - 1) / pageSize);
-        int number = page == null ? 1 : Math.max(1, Math.min(page, totalPages));
+        int number = numberOf(page, pageSize, totalItems);
         int from = Math.min((number - 1) * pageSize, totalItems);
         int to = Math.min(from + pageSize, totalItems);
+        return ofPage(all.subList(from, to), number, pageSize, totalItems, path, filters);
+    }
 
+    /** The page size to use for a requested one: null means {@link #DEFAULT_SIZE}, at most {@link #MAX_SIZE}. */
+    public static int sizeOf(Integer size) {
+        return size == null || size < 1 ? DEFAULT_SIZE : Math.min(size, MAX_SIZE);
+    }
+
+    /** The page to show for a requested one, starting at 1; null or out of range is corrected. */
+    public static int numberOf(Integer page, int size, long totalItems) {
+        return page == null ? 1 : Math.max(1, Math.min(page, totalPages(size, totalItems)));
+    }
+
+    private static int totalPages(int size, long totalItems) {
+        return (int) Math.max(1, (totalItems + size - 1) / size);
+    }
+
+    /**
+     * For a page that was already cut out, e.g. by the database.
+     *
+     * @param items      the items of this page only
+     * @param number     from {@link #numberOf}
+     * @param size       from {@link #sizeOf}
+     * @param totalItems size of the whole list
+     */
+    public static <T> PageView<T> ofPage(List<T> items, int number, int size, long totalItems, String path,
+                                         Map<String, ?> filters) {
         StringBuilder filterQuery = new StringBuilder();
         filters.forEach((name, value) -> {
             if (value != null && !value.toString().isBlank()) {
                 filterQuery.append('&').append(encode(name)).append('=').append(encode(value.toString()));
             }
         });
-        return new PageView<>(List.copyOf(all.subList(from, to)), number, pageSize, totalItems, totalPages, path,
+        return new PageView<>(List.copyOf(items), number, size, (int) totalItems, totalPages(size, totalItems), path,
                 filterQuery.toString());
     }
 

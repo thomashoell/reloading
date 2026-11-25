@@ -11,6 +11,7 @@ import de.tho.reloading.repository.RifleRepository;
 import de.tho.reloading.user.CurrentUser;
 import de.tho.reloading.utility.Calibration;
 import de.tho.reloading.utility.LengthUnit;
+import de.tho.reloading.utility.WeightUnit;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,7 +43,8 @@ import java.util.stream.Collectors;
  * User data: a batch of cases of one lot that were prepared the same way. A user only sees and changes their own
  * batches, and a batch can only point to a casing lot and a rifle of the same user; the ids from the form are
  * looked up with the owner, and the database enforces it again with its foreign keys.
- * The database stores SI units. The form always sends millimeters (see static/js/length-pair.js).
+ * The database stores SI units. The form always sends millimeters (see static/js/length-pair.js) and the case
+ * capacity in grains of water.
  */
 @Slf4j
 @Controller
@@ -121,6 +123,7 @@ public class ProcessedCaseController {
         form.setFiredFrom(batch.getFiredFrom());
         form.setTrimmed(Boolean.TRUE.equals(batch.getTrimmed()));
         form.setCaseLength(LengthUnit.MILLIMETER.fromSi(batch.getCaseLength()));
+        form.setWaterCapacity(WeightUnit.GRAIN.fromSi(batch.getWaterCapacity()));
         form.setCalibrationMethod(batch.getCalibrationMethod());
         form.setCalibrationDie(batch.getCalibrationDie());
         form.setBushing(batch.getBushing());
@@ -168,6 +171,7 @@ public class ProcessedCaseController {
             batch.setFiredFrom(form.getFiredFrom());
             batch.setTrimmed(form.isTrimmed());
             batch.setCaseLength(LengthUnit.MILLIMETER.toSi(form.getCaseLength()));
+            batch.setWaterCapacity(WeightUnit.GRAIN.toSi(form.getWaterCapacity()));
             batch.setCalibrationMethod(form.getCalibrationMethod());
             batch.setCalibrationDie(blankToNull(form.getCalibrationDie()));
             batch.setBushing(blankToNull(form.getBushing()));

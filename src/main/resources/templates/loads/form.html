@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ladung')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 40rem">
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Meine Daten</span>
+        <h1 th:text="${deleteAction == null} ? 'Ladung anlegen' : 'Ladung bearbeiten'">Ladung</h1>
+    </header>
+    <div class="alert alert-info" role="status"
+         th:if="${batchGroups.isEmpty() or bulletGroups.isEmpty() or powderGroups.isEmpty() or primerGroups.isEmpty()}">
+        Eine Ladung braucht eine Hülsencharge und je ein Los für Geschoss, Pulver und Zündhütchen. Es fehlt noch:
+        <a class="alert-link" th:if="${batchGroups.isEmpty()}" th:href="@{/processed-cases/new}">Hülsencharge</a>
+        <a class="alert-link" th:if="${bulletGroups.isEmpty()}" th:href="@{/bullet-lots/new}">Geschoss-Los</a>
+        <a class="alert-link" th:if="${powderGroups.isEmpty()}" th:href="@{/powder-lots/new}">Pulver-Los</a>
+        <a class="alert-link" th:if="${primerGroups.isEmpty()}" th:href="@{/primer-lots/new}">Zündhütchen-Los</a>
+    </div>
+    <div class="lb-card lb-formcard">
+        <form method="post" th:action="@{${action}}" th:object="${form}" novalidate>
+            <div class="alert alert-danger" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                <div th:each="message : ${#fields.globalErrors()}" th:text="${message}">Fehler</div>
+            </div>
+
+            <h2 class="lb-eyebrow d-block mb-3">Komponenten</h2>
+            <div class="mb-3">
+                <label for="processedCase" class="form-label">Hülsencharge</label>
+                <select id="processedCase" class="form-select" th:field="*{processedCase}"
+                        th:classappend="${#fields.hasErrors('processedCase')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('processedCase')} ? 'processedCase-error'">
+                    <option value="">Bitte wählen</option>
+                    <optgroup th:each="group : ${batchGroups}" th:label="${group.key}">
+                        <option th:each="option : ${group.value}" th:value="${option.id}" th:text="${option.label}">Eintrag</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback" id="processedCase-error" th:if="${#fields.hasErrors('processedCase')}" th:errors="*{processedCase}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="bulletLot" class="form-label">Geschoss-Los</label>
+                <select id="bulletLot" class="form-select" th:field="*{bulletLot}"
+                        th:classappend="${#fields.hasErrors('bulletLot')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('bulletLot')} ? 'bulletLot-error'">
+                    <option value="">Bitte wählen</option>
+                    <optgroup th:each="group : ${bulletGroups}" th:label="${group.key}">
+                        <option th:each="option : ${group.value}" th:value="${option.id}" th:text="${option.label}">Eintrag</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback" id="bulletLot-error" th:if="${#fields.hasErrors('bulletLot')}" th:errors="*{bulletLot}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="powderLot" class="form-label">Pulver-Los</label>
+                <select id="powderLot" class="form-select" th:field="*{powderLot}"
+                        th:classappend="${#fields.hasErrors('powderLot')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('powderLot')} ? 'powderLot-error'">
+                    <option value="">Bitte wählen</option>
+                    <optgroup th:each="group : ${powderGroups}" th:label="${group.key}">
+                        <option th:each="option : ${group.value}" th:value="${option.id}" th:text="${option.label}">Eintrag</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback" id="powderLot-error" th:if="${#fields.hasErrors('powderLot')}" th:errors="*{powderLot}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="primerLot" class="form-label">Zündhütchen-Los</label>
+                <select id="primerLot" class="form-select" th:field="*{primerLot}"
+                        th:classappend="${#fields.hasErrors('primerLot')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('primerLot')} ? 'primerLot-error'">
+                    <option value="">Bitte wählen</option>
+                    <optgroup th:each="group : ${primerGroups}" th:label="${group.key}">
+                        <option th:each="option : ${group.value}" th:value="${option.id}" th:text="${option.label}">Eintrag</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback" id="primerLot-error" th:if="${#fields.hasErrors('primerLot')}" th:errors="*{primerLot}">Fehler</div>
+            </div>
+
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Ladedaten</h2>
+            <div class="mb-3">
+                <label for="powderCharge" class="form-label">Pulverladung</label>
+                <div class="input-group has-validation">
+                    <input type="number" step="any" min="0" inputmode="decimal" id="powderCharge" class="form-control" th:field="*{powderCharge}"
+                           th:classappend="${#fields.hasErrors('powderCharge')} ? 'is-invalid'" aria-describedby="powderCharge-help">
+                    <span class="input-group-text" th:text="${weightSymbol}">gr</span>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('powderCharge')}" th:errors="*{powderCharge}">Fehler</div>
+                </div>
+                <div class="form-text" id="powderCharge-help">Einheit wie in deinen <a th:href="@{/settings}">Einstellungen</a>.</div>
+            </div>
+            <fieldset class="mb-3" data-length-pair data-mm-decimals="3">
+                <legend class="form-label">Patronenlänge
+                    <abbr class="lb-term" tabindex="0" data-bs-toggle="tooltip"
+                          title="Cartridge Overall Length: Länge der ganzen Patrone, vom Hülsenboden bis zur Geschossspitze.">COAL</abbr>
+                </legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="overallLength" class="form-control"
+                                   th:field="*{overallLength}" data-unit="mm" aria-label="Patronenlänge in Millimetern"
+                                   th:classappend="${#fields.hasErrors('overallLength')} ? 'is-invalid'" aria-describedby="overallLength-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('overallLength')}" th:errors="*{overallLength}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="overallLength-in" class="form-control"
+                                   data-unit="in" aria-label="Patronenlänge in Zoll" aria-describedby="overallLength-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="overallLength-help">Millimeter oder Zoll eingeben, das andere Feld rechnet mit.</div>
+            </fieldset>
+            <fieldset class="mb-3" data-length-pair data-mm-decimals="3">
+                <legend class="form-label">Boden bis Ogive
+                    <abbr class="lb-term" tabindex="0" data-bs-toggle="tooltip"
+                          title="Cartridge Base To Ogive: Länge vom Hülsenboden bis zur Ogive des Geschosses, gemessen mit einem Komparator. Genauer als die Gesamtlänge, weil Geschossspitzen streuen.">CBTO</abbr>
+                    <span class="lb-optional">optional</span>
+                </legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="baseToOgive" class="form-control"
+                                   th:field="*{baseToOgive}" data-unit="mm" aria-label="Boden bis Ogive in Millimetern"
+                                   th:classappend="${#fields.hasErrors('baseToOgive')} ? 'is-invalid'" aria-describedby="baseToOgive-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('baseToOgive')}" th:errors="*{baseToOgive}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="baseToOgive-in" class="form-control"
+                                   data-unit="in" aria-label="Boden bis Ogive in Zoll" aria-describedby="baseToOgive-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="baseToOgive-help">Gemessen mit einem Komparator.</div>
+            </fieldset>
+
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Charge</h2>
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label for="quantity" class="form-label">Anzahl Patronen</label>
+                    <input type="number" step="1" min="1" inputmode="numeric" id="quantity" class="form-control" th:field="*{quantity}"
+                           th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                           th:attr="aria-describedby=${#fields.hasErrors('quantity')} ? 'quantity-error'">
+                    <div class="invalid-feedback" id="quantity-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">Fehler</div>
+                </div>
+                <div class="col-sm-6">
+                    <label for="loadedOn" class="form-label">Geladen am</label>
+                    <input type="date" id="loadedOn" class="form-control" th:field="*{loadedOn}"
+                           th:classappend="${#fields.hasErrors('loadedOn')} ? 'is-invalid'"
+                           th:attr="aria-describedby=${#fields.hasErrors('loadedOn')} ? 'loadedOn-error'">
+                    <div class="invalid-feedback" id="loadedOn-error" th:if="${#fields.hasErrors('loadedOn')}" th:errors="*{loadedOn}">Fehler</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="rifle" class="form-label">Für Waffe <span class="lb-optional">optional</span></label>
+                <select id="rifle" class="form-select" th:field="*{rifle}"
+                        th:classappend="${#fields.hasErrors('rifle')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('rifle')} ? 'rifle-error'">
+                    <option value="">Keine Waffe</option>
+                    <option th:each="rifle : ${rifles}" th:value="${rifle.key}" th:text="${rifle.value}">Waffe</option>
+                </select>
+                <div class="invalid-feedback" id="rifle-error" th:if="${#fields.hasErrors('rifle')}" th:errors="*{rifle}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notiz <span class="lb-optional">optional</span></label>
+                <textarea id="notes" class="form-control" rows="3" maxlength="2000" th:field="*{notes}"
+                          th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"
+                          th:attr="aria-describedby=${#fields.hasErrors('notes')} ? 'notes-error'"></textarea>
+                <div class="invalid-feedback" id="notes-error" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}">Fehler</div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <a class="btn btn-link" th:href="@{/loads}">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+    <section class="lb-card lb-formcard lb-danger mt-4" th:if="${deleteAction != null}" aria-labelledby="delete-title">
+        <h2 class="h6" id="delete-title">Ladung löschen</h2>
+        <p class="lb-lead mb-3">Das lässt sich nicht rückgängig machen. Eine Ladung mit Schießergebnissen kann nicht gelöscht werden.</p>
+        <form method="post" th:action="@{${deleteAction}}">
+            <button type="submit" class="btn btn-outline-danger">Endgültig löschen</button>
+        </form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:src="@{/js/length-pair.js}" defer></script>
+<script th:src="@{/js/tooltips.js}" defer></script>
+</body>
+</html>

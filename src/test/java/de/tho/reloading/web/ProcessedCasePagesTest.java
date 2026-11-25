@@ -182,6 +182,7 @@ class ProcessedCasePagesTest {
         assertThat(batch.getFiredFrom()).isNull();
         assertThat(batch.getTrimmed()).isFalse();
         assertThat(batch.getCaseLength()).isEqualByComparingTo("0.04851");
+        assertThat(batch.getWaterCapacity()).isNull();
         assertThat(batch.getCalibrationMethod()).isNull();
         assertThat(batch.getMandrelUsed()).isFalse();
         assertThat(batch.getMandrelDiameter()).isNull();
@@ -214,6 +215,7 @@ class ProcessedCasePagesTest {
                         .param("firedFrom", rifle.toString())
                         .param("trimmed", "true")
                         .param("caseLength", "48.6")
+                        .param("waterCapacity", "52.5")
                         .param("calibrationMethod", "SHOULDER_AND_NECK")
                         .param("calibrationDie", " Redding Type S ")
                         .param("bushing", "0.289")
@@ -229,6 +231,8 @@ class ProcessedCasePagesTest {
         assertThat(batch.getFiredFrom()).isEqualTo(rifle);
         assertThat(batch.getTrimmed()).isTrue();
         assertThat(batch.getCaseLength()).isEqualByComparingTo("0.0486");
+        // 52.5 grains of water in kilograms
+        assertThat(batch.getWaterCapacity()).isEqualByComparingTo("0.003401942775");
         assertThat(batch.getCalibrationMethod()).isEqualTo(Calibration.SHOULDER_AND_NECK);
         assertThat(batch.getCalibrationDie()).isEqualTo("Redding Type S");
         assertThat(batch.getBushing()).isEqualTo("0.289");
@@ -247,6 +251,7 @@ class ProcessedCasePagesTest {
                 .andExpect(content().string(containsString("Hülsencharge bearbeiten")))
                 .andExpect(content().string(containsString("value=\"2026-11-15\"")))
                 .andExpect(content().string(containsString("value=\"Redding Type S\"")))
+                .andExpect(content().string(containsString("value=\"52.5\"")))
                 .andExpect(content().string(containsString("selected=\"selected\">S-LOT-1<")))
                 .andExpect(content().string(containsString("selected=\"selected\">TRG (6.5 Creedmoor)<")))
                 .andExpect(content().string(containsString("selected=\"selected\">Schulter und Hals<")))
@@ -340,9 +345,10 @@ class ProcessedCasePagesTest {
                 .andExpect(content().string(containsString("selected=\"selected\">Vollkalibriert<")));
 
         mvc.perform(form("/processed-cases", "strict-batch-user", lot,
-                        "mandrelUsed", "true", "mandrelDiameter", "0"))
+                        "mandrelUsed", "true", "mandrelDiameter", "0", "waterCapacity", "0"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Der Durchmesser muss größer als 0 sein.")));
+                .andExpect(content().string(containsString("Der Durchmesser muss größer als 0 sein.")))
+                .andExpect(content().string(containsString("Das Hülsenvolumen muss größer als 0 sein.")));
 
         mvc.perform(post("/processed-cases").with(user("strict-batch-user"))
                         .param("casingLot", lot.toString()).param("quantity", "50")

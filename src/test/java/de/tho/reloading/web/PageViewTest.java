@@ -93,4 +93,33 @@ class PageViewTest {
                 .containsExactly(1, 0, 8, 9, 10, 11, 12, 0, 20);
         assertThat(PageView.of(numbers(400), 1, null, "/list", NO_FILTERS).getPages()).containsExactly(1, 2, 3, 0, 20);
     }
+
+    @Test
+    void shouldWrapAPageCutOutByTheDatabase() {
+        // 45 rows, the database returned the 5 of the third page
+        int size = PageView.sizeOf(null);
+        int number = PageView.numberOf(99, size, 45);
+        PageView<Integer> page = PageView.ofPage(numbers(5), number, size, 45, "/list", NO_FILTERS);
+
+        assertThat(size).isEqualTo(20);
+        assertThat(number).isEqualTo(3);
+        assertThat(page.getItems()).hasSize(5);
+        assertThat(page.getTotalItems()).isEqualTo(45);
+        assertThat(page.getTotalPages()).isEqualTo(3);
+        assertThat(page.getFirstItem()).isEqualTo(41);
+        assertThat(page.getLastItem()).isEqualTo(45);
+        assertThat(page.isLast()).isTrue();
+        assertThat(page.url(2)).isEqualTo("/list?page=2");
+    }
+
+    @Test
+    void shouldCorrectRequestedPageAndSize() {
+        assertThat(PageView.sizeOf(0)).isEqualTo(20);
+        assertThat(PageView.sizeOf(50)).isEqualTo(50);
+        assertThat(PageView.sizeOf(1000)).isEqualTo(100);
+        assertThat(PageView.numberOf(null, 20, 45)).isEqualTo(1);
+        assertThat(PageView.numberOf(-1, 20, 45)).isEqualTo(1);
+        assertThat(PageView.numberOf(2, 20, 0)).isEqualTo(1);
+        assertThat(PageView.numberOf(3, 20, 40)).isEqualTo(2);
+    }
 }

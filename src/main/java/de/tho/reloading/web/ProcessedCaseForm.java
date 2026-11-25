@@ -14,6 +14,7 @@ import java.util.UUID;
 
 /**
  * Lengths are in millimeters, not in SI units; the inch fields of the form are not sent.
+ * The case capacity is in grains of water.
  * Rules that span several fields (rifle if fired, die if sized, diameter if a mandrel was used) are checked
  * in {@link ProcessedCaseController}.
  */
@@ -43,6 +44,10 @@ public class ProcessedCaseForm {
     @NotNull(message = "Bitte die Hülsenlänge angeben.")
     @Positive(message = "Die Hülsenlänge muss größer als 0 sein.")
     private BigDecimal caseLength;
+
+    // grains of water, whatever weight unit the user prefers: that is how case capacity is given everywhere
+    @Positive(message = "Das Hülsenvolumen muss größer als 0 sein.")
+    private BigDecimal waterCapacity;
 
     private Calibration calibrationMethod;
 

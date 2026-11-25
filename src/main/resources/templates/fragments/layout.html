@@ -54,6 +54,8 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" th:href="@{/processed-cases}" th:classappend="${currentPath == '/processed-cases'} ? 'active'"
                                th:attr="aria-current=${currentPath == '/processed-cases'} ? 'page'">Hülsenchargen</a></li>
+                        <li><a class="dropdown-item" th:href="@{/loads}" th:classappend="${currentPath == '/loads'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/loads'} ? 'page'">Ladungen</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">

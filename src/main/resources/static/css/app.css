@@ -553,3 +553,18 @@ fieldset > legend.form-label {
         transition: none !important;
     }
 }
+
+/* a term with a tooltip, see static/js/tooltips.js; Bootstrap removes the title, so abbr[title] no longer matches */
+.lb-term {
+    font-weight: 500;
+    color: var(--lb-muted);
+    text-decoration: underline dotted;
+    text-underline-offset: .2em;
+    cursor: help;
+    border-radius: .2rem;
+}
+
+.lb-term:focus-visible {
+    outline: 2px solid var(--lb-accent);
+    outline-offset: 2px;
+}

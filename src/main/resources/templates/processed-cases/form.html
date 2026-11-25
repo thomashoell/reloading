@@ -73,7 +73,7 @@
             </div>
             <div class="form-text mb-3" id="timesFired-help">Neue Hülsen: 0 mal, keine Waffe. Ab dem ersten Schuss ist die Waffe Pflicht.</div>
 
-            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Länge</h2>
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Maße</h2>
             <fieldset class="mb-3" data-length-pair>
                 <legend class="form-label">Hülsenlänge</legend>
                 <div class="row g-2">
@@ -100,6 +100,16 @@
             <div class="form-check mb-3">
                 <input type="checkbox" id="trimmed" class="form-check-input" th:field="*{trimmed}">
                 <label for="trimmed" class="form-check-label">Auf diese Länge getrimmt</label>
+            </div>
+            <div class="mb-3">
+                <label for="waterCapacity" class="form-label">Hülsenvolumen <span class="lb-optional">optional</span></label>
+                <div class="input-group has-validation">
+                    <input type="number" step="any" min="0" inputmode="decimal" id="waterCapacity" class="form-control" th:field="*{waterCapacity}"
+                           th:classappend="${#fields.hasErrors('waterCapacity')} ? 'is-invalid'" aria-describedby="waterCapacity-help">
+                    <span class="input-group-text">gr H₂O</span>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('waterCapacity')}" th:errors="*{waterCapacity}">Fehler</div>
+                </div>
+                <div class="form-text" id="waterCapacity-help">Gewicht des Wassers, das eine abgefeuerte Hülse bis zum Rand fasst, in Grain.</div>
             </div>
 
             <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Kalibrierung</h2>
