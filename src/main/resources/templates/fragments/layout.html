@@ -35,9 +35,22 @@
                     <a class="nav-link" th:href="@{/}" th:classappend="${navSection == 'home'} ? 'active'"
                        th:attr="aria-current=${navSection == 'home'} ? 'page'">Start</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/rifles}" th:classappend="${navSection == 'rifles'} ? 'active'"
-                       th:attr="aria-current=${navSection == 'rifles'} ? 'page'">Waffen</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false" th:classappend="${navSection == 'mydata'} ? 'active'">Meine Daten</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/rifles}" th:classappend="${currentPath == '/rifles'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/rifles'} ? 'page'">Waffen</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/casing-lots}" th:classappend="${currentPath == '/casing-lots'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/casing-lots'} ? 'page'">Hülsen-Lose</a></li>
+                        <li><a class="dropdown-item" th:href="@{/bullet-lots}" th:classappend="${currentPath == '/bullet-lots'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/bullet-lots'} ? 'page'">Geschoss-Lose</a></li>
+                        <li><a class="dropdown-item" th:href="@{/powder-lots}" th:classappend="${currentPath == '/powder-lots'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/powder-lots'} ? 'page'">Pulver-Lose</a></li>
+                        <li><a class="dropdown-item" th:href="@{/primer-lots}" th:classappend="${currentPath == '/primer-lots'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/primer-lots'} ? 'page'">Zündhütchen-Lose</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
