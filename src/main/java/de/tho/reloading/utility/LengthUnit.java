@@ -62,4 +62,16 @@ public enum LengthUnit {
         }
         return inches + " " + INCH.symbol + " (" + MILLIMETER.format(si, 2) + " " + MILLIMETER.symbol + ")";
     }
+
+    /**
+     * For lengths that are shown in both units whatever the user prefers, e.g. "660 mm (25.98 in)":
+     * millimeters with up to three decimal places, inches with up to two. Empty for null.
+     */
+    public static String formatMillimetersAndInches(BigDecimal si) {
+        if (si == null) {
+            return "";
+        }
+        String inches = new BigDecimal(INCH.format(si, 2)).stripTrailingZeros().toPlainString();
+        return MILLIMETER.format(si) + " " + MILLIMETER.symbol + " (" + inches + " " + INCH.symbol + ")";
+    }
 }
