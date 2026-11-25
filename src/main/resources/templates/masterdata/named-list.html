@@ -4,33 +4,44 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <h1 class="h3 mb-3" th:text="${title}">Hersteller</h1>
-    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
-    <form method="get" th:action="@{${path}}" class="row g-2 align-items-end mb-3">
-        <div class="col-auto">
-            <label for="q" class="form-label">Name enthält</label>
-            <input type="search" id="q" name="q" class="form-control" th:value="${q}">
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Stammdaten</span>
+        <h1 th:text="${title}">Hersteller</h1>
+        <p class="lb-lead">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
+    </header>
+    <div class="lb-card lb-toolbar">
+        <form method="get" th:action="@{${path}}" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label for="q" class="form-label">Name enthält</label>
+                <input type="search" id="q" name="q" class="form-control" th:value="${q}">
+            </div>
+            <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filtern</button>
+                <a class="btn btn-link" th:href="@{${path}}">Zurücksetzen</a>
+            </div>
+        </form>
+    </div>
+    <div class="lb-card lb-tablecard">
+        <p th:if="${page.empty}" class="lb-empty">Keine Einträge gefunden.</p>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                <th scope="col">Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${page.items}">
+                <td th:text="${item.name}">name</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">Filtern</button>
-            <a class="btn btn-link" th:href="@{${path}}">Zurücksetzen</a>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
         </div>
-    </form>
-    <p th:if="${page.empty}" class="text-secondary">Keine Einträge gefunden.</p>
-    <table th:unless="${page.empty}" class="table table-hover align-middle">
-        <thead>
-        <tr>
-            <th scope="col">Name</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="item : ${page.items}">
-            <td th:text="${item.name}">name</td>
-        </tr>
-        </tbody>
-    </table>
-    <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+    </div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>

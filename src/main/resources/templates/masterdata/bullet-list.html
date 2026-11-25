@@ -4,62 +4,72 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <h1 class="h3 mb-3">Geschosse</h1>
-    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
-    <p class="text-secondary">Gewicht und Länge richten sich nach deinen <a th:href="@{/settings}">Einstellungen</a>; der Durchmesser steht immer in Zoll und Millimetern.</p>
-    <form method="get" th:action="@{/bullets}" class="row g-2 align-items-end mb-3">
-        <div class="col-auto">
-            <label for="manufacturer" class="form-label">Hersteller</label>
-            <select id="manufacturer" name="manufacturer" class="form-select">
-                <option value="">Alle</option>
-                <option th:each="option : ${manufacturers}" th:value="${option.id}" th:text="${option.name}"
-                        th:selected="${option.id == selectedManufacturer}">Eintrag</option>
-            </select>
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Stammdaten</span>
+        <h1>Geschosse</h1>
+        <p class="lb-lead">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung. Gewicht und Länge richten sich nach deinen <a th:href="@{/settings}">Einstellungen</a>; der Durchmesser steht immer in Zoll und Millimetern.</p>
+    </header>
+    <div class="lb-card lb-toolbar">
+        <form method="get" th:action="@{/bullets}" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label for="manufacturer" class="form-label">Hersteller</label>
+                <select id="manufacturer" name="manufacturer" class="form-select">
+                    <option value="">Alle</option>
+                    <option th:each="option : ${manufacturers}" th:value="${option.id}" th:text="${option.name}"
+                            th:selected="${option.id == selectedManufacturer}">Eintrag</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="diameter" class="form-label">Durchmesser</label>
+                <select id="diameter" name="diameter" class="form-select">
+                    <option value="">Alle</option>
+                    <option th:each="option : ${diameters}" th:value="${option.value}" th:text="${option.label}"
+                            th:selected="${option.value == selectedDiameter}">.264 in (6.71 mm)</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="weight" class="form-label">Gewicht</label>
+                <select id="weight" name="weight" class="form-select">
+                    <option value="">Alle</option>
+                    <option th:each="option : ${weights}" th:value="${option.value}" th:text="${option.label}"
+                            th:selected="${option.value == selectedWeight}">140 gr</option>
+                </select>
+            </div>
+            <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filtern</button>
+                <a class="btn btn-link" th:href="@{/bullets}">Zurücksetzen</a>
+            </div>
+        </form>
+    </div>
+    <div class="lb-card lb-tablecard">
+        <p th:if="${page.empty}" class="lb-empty">Keine Einträge gefunden.</p>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                <th scope="col">Hersteller</th>
+                <th scope="col">Bezeichnung</th>
+                <th scope="col" class="text-end">Durchmesser</th>
+                <th scope="col" class="text-end">Gewicht (<span th:text="${user.weightUnit.symbol}">gr</span>)</th>
+                <th scope="col" class="text-end">Länge (<span th:text="${user.lengthUnit.symbol}">mm</span>)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="bullet : ${page.items}">
+                <td th:text="${bullet.manufacturer}">manufacturer</td>
+                <td th:text="${bullet.name}">name</td>
+                <td class="text-end" th:text="${bullet.diameter}">diameter</td>
+                <td class="text-end" th:text="${bullet.weight}">weight</td>
+                <td class="text-end" th:text="${bullet.length}">length</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="col-auto">
-            <label for="diameter" class="form-label">Durchmesser</label>
-            <select id="diameter" name="diameter" class="form-select">
-                <option value="">Alle</option>
-                <option th:each="option : ${diameters}" th:value="${option.value}" th:text="${option.label}"
-                        th:selected="${option.value == selectedDiameter}">.264 in (6.71 mm)</option>
-            </select>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
         </div>
-        <div class="col-auto">
-            <label for="weight" class="form-label">Gewicht</label>
-            <select id="weight" name="weight" class="form-select">
-                <option value="">Alle</option>
-                <option th:each="option : ${weights}" th:value="${option.value}" th:text="${option.label}"
-                        th:selected="${option.value == selectedWeight}">140 gr</option>
-            </select>
-        </div>
-        <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">Filtern</button>
-            <a class="btn btn-link" th:href="@{/bullets}">Zurücksetzen</a>
-        </div>
-    </form>
-    <p th:if="${page.empty}" class="text-secondary">Keine Einträge gefunden.</p>
-    <table th:unless="${page.empty}" class="table table-hover align-middle">
-        <thead>
-        <tr>
-            <th scope="col">Hersteller</th>
-            <th scope="col">Bezeichnung</th>
-            <th scope="col" class="text-end">Durchmesser</th>
-            <th scope="col" class="text-end">Gewicht (<span th:text="${user.weightUnit.symbol}">gr</span>)</th>
-            <th scope="col" class="text-end">Länge (<span th:text="${user.lengthUnit.symbol}">mm</span>)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="bullet : ${page.items}">
-            <td th:text="${bullet.manufacturer}">manufacturer</td>
-            <td th:text="${bullet.name}">name</td>
-            <td class="text-end" th:text="${bullet.diameter}">diameter</td>
-            <td class="text-end" th:text="${bullet.weight}">weight</td>
-            <td class="text-end" th:text="${bullet.length}">length</td>
-        </tr>
-        </tbody>
-    </table>
-    <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+    </div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>

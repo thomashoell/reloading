@@ -4,24 +4,28 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container" style="max-width: 40rem">
-    <h1 class="h3 mb-3">Einstellungen</h1>
+    <header class="lb-pagehead">
+        <h1>Einstellungen</h1>
+        <p class="lb-lead">In diesen Einheiten gibst du Maße ein und bekommst sie angezeigt. Gespeichert wird unabhängig davon in SI-Einheiten.</p>
+    </header>
     <div th:replace="~{fragments/layout :: messages}"></div>
-    <p class="text-secondary">In diesen Einheiten gibst du Maße ein und bekommst sie angezeigt. Gespeichert wird unabhängig davon in SI-Einheiten.</p>
-    <form method="post" th:action="@{/settings}" th:object="${form}">
-        <div class="mb-3">
-            <label for="weightUnit" class="form-label">Gewichte</label>
-            <select id="weightUnit" class="form-select" th:field="*{weightUnit}">
-                <option th:each="unit : ${weightUnits}" th:value="${unit}" th:text="${unit.label} + ' (' + ${unit.symbol} + ')'">Grain (gr)</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="lengthUnit" class="form-label">Längen</label>
-            <select id="lengthUnit" class="form-select" th:field="*{lengthUnit}">
-                <option th:each="unit : ${lengthUnits}" th:value="${unit}" th:text="${unit.label} + ' (' + ${unit.symbol} + ')'">Millimeter (mm)</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Speichern</button>
-    </form>
+    <div class="lb-card lb-formcard">
+        <form method="post" th:action="@{/settings}" th:object="${form}">
+            <div class="mb-3">
+                <label for="weightUnit" class="form-label">Gewichte</label>
+                <select id="weightUnit" class="form-select" th:field="*{weightUnit}">
+                    <option th:each="unit : ${weightUnits}" th:value="${unit}" th:text="${unit.label} + ' (' + ${unit.symbol} + ')'">Grain (gr)</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="lengthUnit" class="form-label">Längen</label>
+                <select id="lengthUnit" class="form-select" th:field="*{lengthUnit}">
+                    <option th:each="unit : ${lengthUnits}" th:value="${unit}" th:text="${unit.label} + ' (' + ${unit.symbol} + ')'">Millimeter (mm)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Speichern</button>
+        </form>
+    </div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>

@@ -5,40 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' – Ladebuch'">Ladebuch</title>
+    <!-- light or dark like the system; set before the first paint -->
+    <script>document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');</script>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 
 <body>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg bg-body-tertiary mb-4">
+<!-- navSection and currentPath come from GlobalModel -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg lb-bar mb-4" aria-label="Hauptnavigation">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/}">Ladebuch</a>
+        <a class="navbar-brand lb-brand" th:href="@{/}">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                 stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="8"/>
+                <circle cx="12" cy="12" r="2.25"/>
+                <path d="M12 1.5v5M12 17.5v5M1.5 12h5M17.5 12h5"/>
+            </svg>
+            <span>Ladebuch</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation"
                 aria-controls="navigation" aria-expanded="false" aria-label="Navigation ein- oder ausblenden">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navigation">
             <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}" th:classappend="${navSection == 'home'} ? 'active'"
+                       th:attr="aria-current=${navSection == 'home'} ? 'page'">Start</a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                       aria-expanded="false">Stammdaten</a>
+                       aria-expanded="false" th:classappend="${navSection == 'masterdata'} ? 'active'">Stammdaten</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" th:href="@{/manufacturers}">Hersteller</a></li>
-                        <li><a class="dropdown-item" th:href="@{/calibers}">Kaliber</a></li>
+                        <li><a class="dropdown-item" th:href="@{/manufacturers}" th:classappend="${currentPath == '/manufacturers'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/manufacturers'} ? 'page'">Hersteller</a></li>
+                        <li><a class="dropdown-item" th:href="@{/calibers}" th:classappend="${currentPath == '/calibers'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/calibers'} ? 'page'">Kaliber</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" th:href="@{/casings}">Hülsen</a></li>
-                        <li><a class="dropdown-item" th:href="@{/bullets}">Geschosse</a></li>
-                        <li><a class="dropdown-item" th:href="@{/powders}">Pulver</a></li>
-                        <li><a class="dropdown-item" th:href="@{/primers}">Zündhütchen</a></li>
+                        <li><a class="dropdown-item" th:href="@{/casings}" th:classappend="${currentPath == '/casings'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/casings'} ? 'page'">Hülsen</a></li>
+                        <li><a class="dropdown-item" th:href="@{/bullets}" th:classappend="${currentPath == '/bullets'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/bullets'} ? 'page'">Geschosse</a></li>
+                        <li><a class="dropdown-item" th:href="@{/powders}" th:classappend="${currentPath == '/powders'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/powders'} ? 'page'">Pulver</a></li>
+                        <li><a class="dropdown-item" th:href="@{/primers}" th:classappend="${currentPath == '/primers'} ? 'active'"
+                               th:attr="aria-current=${currentPath == '/primers'} ? 'page'">Zündhütchen</a></li>
                     </ul>
                 </li>
             </ul>
-            <a class="nav-link me-3" th:href="@{/settings}">
+            <a class="lb-user me-lg-2" th:href="@{/settings}" title="Einstellungen">
                 <span th:text="${user.username}">benutzer</span>
-                (<span th:text="${user.admin} ? 'Administrator' : 'Benutzer'">Rolle</span>)
+                <span class="lb-role" th:text="${user.admin} ? 'Administrator' : 'Benutzer'">Rolle</span>
             </a>
             <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn-outline-secondary btn-sm">Abmelden</button>
+                <button type="submit" class="btn btn-outline-light btn-sm btn-logout">Abmelden</button>
             </form>
         </div>
     </div>
@@ -61,7 +83,7 @@
 
 <!-- page is a PageView -->
 <div th:fragment="pagination(page)" class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <span class="text-secondary" th:unless="${page.empty}"
+    <span class="lb-pageinfo" th:unless="${page.empty}"
           th:text="|Einträge ${page.firstItem}–${page.lastItem} von ${page.totalItems}|">Einträge 1–20 von 66</span>
     <nav th:if="${page.totalPages > 1}" aria-label="Seiten">
         <ul class="pagination mb-0">
@@ -71,7 +93,8 @@
             <li th:each="n : ${page.pages}" class="page-item"
                 th:classappend="${n == page.number ? 'active' : (n == 0 ? 'disabled' : '')}">
                 <span th:if="${n == 0}" class="page-link">…</span>
-                <a th:unless="${n == 0}" class="page-link" th:href="@{${page.url(n)}}" th:text="${n}">1</a>
+                <a th:unless="${n == 0}" class="page-link" th:href="@{${page.url(n)}}" th:text="${n}"
+                   th:attr="aria-current=${n == page.number} ? 'page'">1</a>
             </li>
             <li class="page-item" th:classappend="${page.last} ? 'disabled'">
                 <a class="page-link" th:href="@{${page.url(page.number + 1)}}">Weiter</a>
