@@ -33,6 +33,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health/**").permitAll()
+                        // the icon holds nothing secret and the browser also asks for it before the login
+                        .requestMatchers("/favicon.svg").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(Customizer.withDefaults())
                 .logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler));
