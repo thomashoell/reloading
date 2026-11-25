@@ -37,6 +37,8 @@ public class ProcessedCase {
     private Boolean trimmed;
     // meters
     private BigDecimal caseLength;
+    // case capacity as the mass of water the case holds ("grains of water"), kilograms; optional
+    private BigDecimal waterCapacity;
     private Calibration calibrationMethod;
     private String calibrationDie;
     private String bushing;

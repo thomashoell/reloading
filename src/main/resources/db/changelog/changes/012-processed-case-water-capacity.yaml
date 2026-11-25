@@ -1,0 +1,19 @@
+# case capacity of a batch, measured as the mass of water a fired case holds (reloaders say "grains of water")
+# stored like every measure in an SI base unit: kilograms of water; the UI takes and shows grains
+databaseChangeLog:
+  - changeSet:
+      id: 20261125-1900-processed-case-water-capacity
+      author: tho
+
+      changes:
+        - addColumn:
+            tableName: processed_case
+            columns:
+              - column:
+                  name: water_capacity
+                  type: numeric
+        - sql:
+            sql: >
+              ALTER TABLE processed_case
+                ADD CONSTRAINT ck_processed_case_water_capacity
+                  CHECK (water_capacity > 0);
