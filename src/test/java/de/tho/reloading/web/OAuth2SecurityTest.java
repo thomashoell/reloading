@@ -62,6 +62,13 @@ class OAuth2SecurityTest {
     }
 
     @Test
+    void shouldServeFaviconWithoutLogin() throws Exception {
+        mvc.perform(get("/favicon.svg"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<svg")));
+    }
+
+    @Test
     void shouldRejectPostWithoutCsrfToken() throws Exception {
         mvc.perform(post("/logout").with(oauth2Login()))
                 .andExpect(status().isForbidden());
