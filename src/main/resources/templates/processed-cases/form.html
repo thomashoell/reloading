@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Hülsencharge')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 40rem">
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Meine Daten</span>
+        <h1 th:text="${deleteAction == null} ? 'Hülsencharge anlegen' : 'Hülsencharge bearbeiten'">Hülsencharge</h1>
+    </header>
+    <div class="alert alert-info" role="status" th:if="${lotGroups.isEmpty()}">
+        Eine Charge gehört zu einem Hülsen-Los. Du hast noch keins.
+        <a class="alert-link" th:href="@{/casing-lots/new}">Hülsen-Los anlegen</a>
+    </div>
+    <div class="lb-card lb-formcard">
+        <form method="post" th:action="@{${action}}" th:object="${form}" novalidate>
+            <div class="alert alert-danger" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                <div th:each="message : ${#fields.globalErrors()}" th:text="${message}">Fehler</div>
+            </div>
+
+            <h2 class="lb-eyebrow d-block mb-3">Charge</h2>
+            <div class="mb-3">
+                <label for="casingLot" class="form-label">Hülsen-Los</label>
+                <select id="casingLot" class="form-select" th:field="*{casingLot}"
+                        th:classappend="${#fields.hasErrors('casingLot')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('casingLot')} ? 'casingLot-error'">
+                    <option value="">Bitte wählen</option>
+                    <optgroup th:each="group : ${lotGroups}" th:label="${group.key}">
+                        <option th:each="option : ${group.value}" th:value="${option.id}" th:text="${option.label}">Los</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback" id="casingLot-error" th:if="${#fields.hasErrors('casingLot')}" th:errors="*{casingLot}">Fehler</div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label for="quantity" class="form-label">Anzahl Hülsen</label>
+                    <input type="number" step="1" min="1" inputmode="numeric" id="quantity" class="form-control" th:field="*{quantity}"
+                           th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                           th:attr="aria-describedby=${#fields.hasErrors('quantity')} ? 'quantity-error'">
+                    <div class="invalid-feedback" id="quantity-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">Fehler</div>
+                </div>
+                <div class="col-sm-6">
+                    <label for="processedOn" class="form-label">Vorbereitet am</label>
+                    <input type="date" id="processedOn" class="form-control" th:field="*{processedOn}"
+                           th:classappend="${#fields.hasErrors('processedOn')} ? 'is-invalid'"
+                           th:attr="aria-describedby=${#fields.hasErrors('processedOn')} ? 'processedOn-error'">
+                    <div class="invalid-feedback" id="processedOn-error" th:if="${#fields.hasErrors('processedOn')}" th:errors="*{processedOn}">Fehler</div>
+                </div>
+            </div>
+
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Gebrauch</h2>
+            <div class="row g-3 mb-3">
+                <div class="col-sm-4">
+                    <label for="timesFired" class="form-label">Verschossen</label>
+                    <div class="input-group has-validation">
+                        <input type="number" step="1" min="0" inputmode="numeric" id="timesFired" class="form-control" th:field="*{timesFired}"
+                               th:classappend="${#fields.hasErrors('timesFired')} ? 'is-invalid'"
+                               th:attr="aria-describedby=${#fields.hasErrors('timesFired')} ? 'timesFired-error' : 'timesFired-help'">
+                        <span class="input-group-text">mal</span>
+                        <div class="invalid-feedback" id="timesFired-error" th:if="${#fields.hasErrors('timesFired')}" th:errors="*{timesFired}">Fehler</div>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <label for="firedFrom" class="form-label">Zuletzt verschossen aus</label>
+                    <select id="firedFrom" class="form-select" th:field="*{firedFrom}"
+                            th:classappend="${#fields.hasErrors('firedFrom')} ? 'is-invalid'"
+                            th:attr="aria-describedby=${#fields.hasErrors('firedFrom')} ? 'firedFrom-error' : 'timesFired-help'">
+                        <option value="">Keine Waffe</option>
+                        <option th:each="rifle : ${rifles}" th:value="${rifle.key}" th:text="${rifle.value}">Waffe</option>
+                    </select>
+                    <div class="invalid-feedback" id="firedFrom-error" th:if="${#fields.hasErrors('firedFrom')}" th:errors="*{firedFrom}">Fehler</div>
+                </div>
+            </div>
+            <div class="form-text mb-3" id="timesFired-help">Neue Hülsen: 0 mal, keine Waffe. Ab dem ersten Schuss ist die Waffe Pflicht.</div>
+
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Länge</h2>
+            <fieldset class="mb-3" data-length-pair>
+                <legend class="form-label">Hülsenlänge</legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="caseLength" class="form-control"
+                                   th:field="*{caseLength}" data-unit="mm" aria-label="Hülsenlänge in Millimetern"
+                                   th:classappend="${#fields.hasErrors('caseLength')} ? 'is-invalid'" aria-describedby="caseLength-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('caseLength')}" th:errors="*{caseLength}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="caseLength-in" class="form-control"
+                                   data-unit="in" aria-label="Hülsenlänge in Zoll" aria-describedby="caseLength-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="caseLength-help">Millimeter oder Zoll eingeben, das andere Feld rechnet mit.</div>
+            </fieldset>
+            <div class="form-check mb-3">
+                <input type="checkbox" id="trimmed" class="form-check-input" th:field="*{trimmed}">
+                <label for="trimmed" class="form-check-label">Auf diese Länge getrimmt</label>
+            </div>
+
+            <h2 class="lb-eyebrow d-block mt-4 pt-2 mb-3">Kalibrierung</h2>
+            <div class="mb-3">
+                <label for="calibrationMethod" class="form-label">Methode</label>
+                <select id="calibrationMethod" class="form-select" th:field="*{calibrationMethod}">
+                    <option value="">Nicht kalibriert</option>
+                    <option th:each="method : ${calibrationMethods}" th:value="${method}" th:text="${method.label}">Methode</option>
+                </select>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-sm-7">
+                    <label for="calibrationDie" class="form-label">Matrize</label>
+                    <input type="text" id="calibrationDie" class="form-control" th:field="*{calibrationDie}" autocomplete="off"
+                           th:classappend="${#fields.hasErrors('calibrationDie')} ? 'is-invalid'"
+                           th:attr="aria-describedby=${#fields.hasErrors('calibrationDie')} ? 'calibrationDie-error' : 'calibrationDie-help'">
+                    <div class="invalid-feedback" id="calibrationDie-error" th:if="${#fields.hasErrors('calibrationDie')}" th:errors="*{calibrationDie}">Fehler</div>
+                    <div class="form-text" id="calibrationDie-help">Pflicht, wenn kalibriert wurde.</div>
+                </div>
+                <div class="col-sm-5">
+                    <label for="bushing" class="form-label">Bushing <span class="lb-optional">optional</span></label>
+                    <input type="text" id="bushing" class="form-control" th:field="*{bushing}" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-check mb-2">
+                <input type="checkbox" id="mandrelUsed" class="form-check-input" th:field="*{mandrelUsed}">
+                <label for="mandrelUsed" class="form-check-label">Hals mit Dorn aufgeweitet</label>
+            </div>
+            <fieldset class="mb-3" data-length-pair data-mm-decimals="4" data-in-decimals="4">
+                <legend class="form-label">Durchmesser des Dorns</legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="mandrelDiameter" class="form-control"
+                                   th:field="*{mandrelDiameter}" data-unit="mm" aria-label="Durchmesser des Dorns in Millimetern"
+                                   th:classappend="${#fields.hasErrors('mandrelDiameter')} ? 'is-invalid'" aria-describedby="mandrelDiameter-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('mandrelDiameter')}" th:errors="*{mandrelDiameter}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="mandrelDiameter-in" class="form-control"
+                                   data-unit="in" aria-label="Durchmesser des Dorns in Zoll" aria-describedby="mandrelDiameter-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="mandrelDiameter-help">Pflicht mit Dorn, z. B. .2625 in (6.6675 mm). Ohne Haken wird der Wert nicht gespeichert.</div>
+            </fieldset>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <a class="btn btn-link" th:href="@{/processed-cases}">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+    <section class="lb-card lb-formcard lb-danger mt-4" th:if="${deleteAction != null}" aria-labelledby="delete-title">
+        <h2 class="h6" id="delete-title">Hülsencharge löschen</h2>
+        <p class="lb-lead mb-3">Das lässt sich nicht rückgängig machen. Eine Charge, die in Ladungen vorkommt, kann nicht gelöscht werden.</p>
+        <form method="post" th:action="@{${deleteAction}}">
+            <button type="submit" class="btn btn-outline-danger">Endgültig löschen</button>
+        </form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:src="@{/js/length-pair.js}" defer></script>
+</body>
+</html>
