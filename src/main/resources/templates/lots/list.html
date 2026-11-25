@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <header class="lb-pagehead lb-pagehead-actions">
+        <div>
+            <span class="lb-eyebrow">Meine Daten</span>
+            <h1 th:text="${title}">Hülsen-Lose</h1>
+            <p class="lb-lead">Deine gekauften Lose. Nur du siehst sie.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{|${path}/new|}" th:text="|${singular} anlegen|">Los anlegen</a>
+    </header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <div class="lb-card lb-tablecard">
+        <div th:if="${page.empty}" class="lb-empty">
+            <p class="mb-3" th:text="|Du hast noch kein ${singular} angelegt.|">Du hast noch kein Los angelegt.</p>
+            <a class="btn btn-outline-primary" th:href="@{|${path}/new|}">Erstes Los anlegen</a>
+        </div>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th scope="col" th:text="${productLabel}">Hülse</th>
+                    <th scope="col">Losnummer</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Aktionen</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${page.items}">
+                    <td th:text="${row.product}">product</td>
+                    <td th:text="${row.lotNumber}">lotNumber</td>
+                    <td class="text-end">
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{|${path}/${row.id}/edit|}"
+                           th:attr="aria-label=|Los ${row.lotNumber} bearbeiten|">Bearbeiten</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+        </div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

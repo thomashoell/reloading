@@ -35,7 +35,7 @@ public class GlobalModel {
         return request.getRequestURI().substring(request.getContextPath().length());
     }
 
-    /** Section of the navigation the current page belongs to: home, rifles, masterdata, settings or empty. */
+    /** Section of the navigation the current page belongs to: home, mydata, masterdata, settings or empty. */
     @ModelAttribute("navSection")
     public String navSection(HttpServletRequest request) {
         String path = currentPath(request);
@@ -45,8 +45,8 @@ public class GlobalModel {
         if (path.startsWith("/settings")) {
             return "settings";
         }
-        if (path.startsWith("/rifles")) {
-            return "rifles";
+        if (path.startsWith("/rifles") || path.contains("-lots")) {
+            return "mydata";
         }
         return MASTER_DATA_PATHS.stream().anyMatch(path::startsWith) ? "masterdata" : "";
     }
