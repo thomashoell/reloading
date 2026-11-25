@@ -115,4 +115,13 @@ public class RifleRepositoryTest {
         assertThatThrownBy(() -> sut.save(withoutOwner))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    void shouldDeleteRifle() {
+        Rifle rifle = data.rifle();
+
+        sut.delete(rifle);
+
+        assertThat(sut.findByOwner(rifle.getOwner())).isEmpty();
+    }
 }

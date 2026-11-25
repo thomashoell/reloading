@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Waffe')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container" style="max-width: 40rem">
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Meine Daten</span>
+        <h1 th:text="${deleteAction == null} ? 'Waffe anlegen' : 'Waffe bearbeiten'">Waffe</h1>
+    </header>
+    <div class="lb-card lb-formcard">
+        <form method="post" th:action="@{${action}}" th:object="${form}" novalidate>
+            <div class="alert alert-danger" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                <div th:each="message : ${#fields.globalErrors()}" th:text="${message}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Bezeichnung</label>
+                <input type="text" id="name" class="form-control" th:field="*{name}" autocomplete="off"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                       th:attr="aria-describedby=${#fields.hasErrors('name')} ? 'name-error'">
+                <div class="invalid-feedback" id="name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="manufacturer" class="form-label">Hersteller</label>
+                <select id="manufacturer" class="form-select" th:field="*{manufacturer}"
+                        th:classappend="${#fields.hasErrors('manufacturer')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('manufacturer')} ? 'manufacturer-error'">
+                    <option value="">Bitte wählen</option>
+                    <option th:each="item : ${manufacturers}" th:value="${item.id}" th:text="${item.name}">Eintrag</option>
+                </select>
+                <div class="invalid-feedback" id="manufacturer-error" th:if="${#fields.hasErrors('manufacturer')}" th:errors="*{manufacturer}">Fehler</div>
+            </div>
+            <div class="mb-3">
+                <label for="caliber" class="form-label">Kaliber</label>
+                <select id="caliber" class="form-select" th:field="*{caliber}"
+                        th:classappend="${#fields.hasErrors('caliber')} ? 'is-invalid'"
+                        th:attr="aria-describedby=${#fields.hasErrors('caliber')} ? 'caliber-error'">
+                    <option value="">Bitte wählen</option>
+                    <option th:each="item : ${calibers}" th:value="${item.id}" th:text="${item.name}">Eintrag</option>
+                </select>
+                <div class="invalid-feedback" id="caliber-error" th:if="${#fields.hasErrors('caliber')}" th:errors="*{caliber}">Fehler</div>
+            </div>
+            <fieldset class="mb-3" data-length-pair>
+                <legend class="form-label">Lauflänge <span class="lb-optional">optional</span></legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="barrelLength" class="form-control"
+                                   th:field="*{barrelLength}" data-unit="mm" aria-label="Lauflänge in Millimetern"
+                                   th:classappend="${#fields.hasErrors('barrelLength')} ? 'is-invalid'" aria-describedby="barrelLength-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('barrelLength')}" th:errors="*{barrelLength}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="barrelLength-in" class="form-control"
+                                   data-unit="in" aria-label="Lauflänge in Zoll" aria-describedby="barrelLength-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="barrelLength-help">Millimeter oder Zoll eingeben, das andere Feld rechnet mit.</div>
+            </fieldset>
+            <fieldset class="mb-3" data-length-pair>
+                <legend class="form-label">Dralllänge <span class="lb-optional">optional</span></legend>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <div class="input-group has-validation">
+                            <input type="number" step="any" min="0" inputmode="decimal" id="lengthOfTwist" class="form-control"
+                                   th:field="*{lengthOfTwist}" data-unit="mm" aria-label="Dralllänge in Millimetern"
+                                   th:classappend="${#fields.hasErrors('lengthOfTwist')} ? 'is-invalid'" aria-describedby="lengthOfTwist-help">
+                            <span class="input-group-text">mm</span>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lengthOfTwist')}" th:errors="*{lengthOfTwist}">Fehler</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <!-- no name: converted in the browser, only millimeters are sent -->
+                            <input type="number" step="any" min="0" inputmode="decimal" id="lengthOfTwist-in" class="form-control"
+                                   data-unit="in" aria-label="Dralllänge in Zoll" aria-describedby="lengthOfTwist-help">
+                            <span class="input-group-text">in</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-text" id="lengthOfTwist-help">Strecke für eine volle Umdrehung, z. B. 8 in (203.2 mm) für einen Drall 1:8.</div>
+            </fieldset>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <a class="btn btn-link" th:href="@{/rifles}">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+    <section class="lb-card lb-formcard lb-danger mt-4" th:if="${deleteAction != null}" aria-labelledby="delete-title">
+        <h2 class="h6" id="delete-title">Waffe löschen</h2>
+        <p class="lb-lead mb-3">Das lässt sich nicht rückgängig machen. Eine Waffe, die in Hülsenchargen, Ladungen oder Ergebnissen vorkommt, kann nicht gelöscht werden.</p>
+        <form method="post" th:action="@{${deleteAction}}">
+            <button type="submit" class="btn btn-outline-danger">Endgültig löschen</button>
+        </form>
+    </section>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:src="@{/js/length-pair.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Waffen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <header class="lb-pagehead lb-pagehead-actions">
+        <div>
+            <span class="lb-eyebrow">Meine Daten</span>
+            <h1>Waffen</h1>
+            <p class="lb-lead">Deine Waffen. Nur du siehst sie.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/rifles/new}">Waffe anlegen</a>
+    </header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <div class="lb-card lb-tablecard">
+        <div th:if="${page.empty}" class="lb-empty">
+            <p class="mb-3">Du hast noch keine Waffe angelegt.</p>
+            <a class="btn btn-outline-primary" th:href="@{/rifles/new}">Erste Waffe anlegen</a>
+        </div>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th scope="col">Bezeichnung</th>
+                    <th scope="col">Hersteller</th>
+                    <th scope="col">Kaliber</th>
+                    <th scope="col" class="text-end">Lauflänge</th>
+                    <th scope="col" class="text-end">Dralllänge</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Aktionen</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rifle : ${page.items}">
+                    <td th:text="${rifle.name}">name</td>
+                    <td th:text="${rifle.manufacturer}">manufacturer</td>
+                    <td th:text="${rifle.caliber}">caliber</td>
+                    <td class="text-end" th:text="${rifle.barrelLength}">660 mm (25.98 in)</td>
+                    <td class="text-end" th:text="${rifle.lengthOfTwist}">203.2 mm (8 in)</td>
+                    <td class="text-end">
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/rifles/{id}/edit(id=${rifle.id})}"
+                           th:attr="aria-label=|${rifle.name} bearbeiten|">Bearbeiten</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+        </div>
+    </div>
+</main>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

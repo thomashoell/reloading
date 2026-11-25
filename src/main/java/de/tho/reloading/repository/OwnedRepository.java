@@ -20,4 +20,7 @@ public interface OwnedRepository<T> extends Repository<T, UUID> {
     Optional<T> findByIdAndOwner(UUID id, UUID owner);
 
     List<T> findByOwner(UUID owner);
+
+    /** Only for an entity that was loaded with {@link #findByIdAndOwner(UUID, UUID)}. */
+    void delete(T entity);
 }

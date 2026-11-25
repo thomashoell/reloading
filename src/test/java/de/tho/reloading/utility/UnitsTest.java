@@ -70,4 +70,12 @@ class UnitsTest {
         assertThat(LengthUnit.formatDiameter(new BigDecimal("0.0254"))).isEqualTo("1.000 in (25.40 mm)");
         assertThat(LengthUnit.formatDiameter(null)).isEmpty();
     }
+
+    @Test
+    void shouldFormatLengthInMillimetersAndInches() {
+        assertThat(LengthUnit.formatMillimetersAndInches(new BigDecimal("0.66"))).isEqualTo("660 mm (25.98 in)");
+        assertThat(LengthUnit.formatMillimetersAndInches(new BigDecimal("0.2032"))).isEqualTo("203.2 mm (8 in)");
+        assertThat(LengthUnit.formatMillimetersAndInches(new BigDecimal("0.6604"))).isEqualTo("660.4 mm (26 in)");
+        assertThat(LengthUnit.formatMillimetersAndInches(null)).isEmpty();
+    }
 }
