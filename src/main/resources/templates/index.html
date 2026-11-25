@@ -4,17 +4,56 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <h1 class="mb-4">Ladebuch</h1>
+    <header class="lb-pagehead">
+        <h1>Ladebuch</h1>
+        <p class="lb-lead">Dein digitales Ladebuch für Komponenten, Ladungen und Schießergebnisse.</p>
+    </header>
     <div th:replace="~{fragments/layout :: messages}"></div>
-    <h2 class="h5">Stammdaten</h2>
-    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
-    <div class="list-group mb-4">
-        <a class="list-group-item list-group-item-action" th:href="@{/manufacturers}">Hersteller</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/calibers}">Kaliber</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/casings}">Hülsen</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/bullets}">Geschosse</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/powders}">Pulver</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/primers}">Zündhütchen</a>
+    <h2 class="lb-section-title">Stammdaten</h2>
+    <p class="lb-lead mb-3">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
+    <div class="lb-tiles">
+        <a class="lb-card lb-tile" th:href="@{/manufacturers}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V10l6 4V10l6 4V4h6v17z"/><path d="M7 17h2M12 17h2M17 17h1"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Hersteller</span>
+                <span class="lb-tile-text">Komponenten- und Waffenhersteller</span>
+            </span>
+        </a>
+        <a class="lb-card lb-tile" th:href="@{/calibers}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Kaliber</span>
+                <span class="lb-tile-text">Patronenbezeichnungen</span>
+            </span>
+        </a>
+        <a class="lb-card lb-tile" th:href="@{/casings}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v15a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/><path d="M7 20.5h10M8 7h8"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Hülsen</span>
+                <span class="lb-tile-text">Hersteller und Kaliber</span>
+            </span>
+        </a>
+        <a class="lb-card lb-tile" th:href="@{/bullets}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c3 3 4.5 6.5 4.5 10.5v8h-9v-8c0-4 1.5-7.5 4.5-10.5z"/><path d="M7.5 17h9"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Geschosse</span>
+                <span class="lb-tile-text">Durchmesser, Gewicht, Länge</span>
+            </span>
+        </a>
+        <a class="lb-card lb-tile" th:href="@{/powders}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v5.5L5 19a1.5 1.5 0 0 0 1.4 2h11.2A1.5 1.5 0 0 0 19 19l-5-10.5V3"/><path d="M7.5 15h9"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Pulver</span>
+                <span class="lb-tile-text">Treibladungspulver nach Hersteller</span>
+            </span>
+        </a>
+        <a class="lb-card lb-tile" th:href="@{/primers}">
+            <span class="lb-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></span>
+            <span>
+                <span class="lb-tile-title">Zündhütchen</span>
+                <span class="lb-tile-text">Bezeichnung und Größe</span>
+            </span>
+        </a>
     </div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>

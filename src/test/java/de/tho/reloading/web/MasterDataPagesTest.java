@@ -82,6 +82,20 @@ class MasterDataPagesTest {
     }
 
     @Test
+    void shouldServeTheStylesheetAndMarkTheCurrentPage() throws Exception {
+        mvc.perform(get("/css/app.css").with(user(USER)))
+                .andExpect(status().isOk());
+        mvc.perform(get("/").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/css/app.css\"")))
+                .andExpect(content().string(containsString("aria-current=\"page\">Start<")));
+        mvc.perform(get("/bullets").with(user(USER)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("aria-current=\"page\">Geschosse<")))
+                .andExpect(content().string(not(containsString("aria-current=\"page\">Start<"))));
+    }
+
+    @Test
     void shouldServeBootstrap() throws Exception {
         mvc.perform(get("/webjars/bootstrap/css/bootstrap.min.css").with(user(USER)))
                 .andExpect(status().isOk());

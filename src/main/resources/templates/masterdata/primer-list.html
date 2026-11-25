@@ -4,41 +4,52 @@
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <main class="container">
-    <h1 class="h3 mb-3">Zündhütchen</h1>
-    <p class="text-secondary">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
-    <form method="get" th:action="@{/primers}" class="row g-2 align-items-end mb-3">
-        <div class="col-auto">
-            <label for="manufacturer" class="form-label">Hersteller</label>
-            <select id="manufacturer" name="manufacturer" class="form-select">
-                <option value="">Alle</option>
-                <option th:each="option : ${manufacturers}" th:value="${option.id}" th:text="${option.name}"
-                        th:selected="${option.id == selectedManufacturer}">Eintrag</option>
-            </select>
+    <header class="lb-pagehead">
+        <span class="lb-eyebrow">Stammdaten</span>
+        <h1>Zündhütchen</h1>
+        <p class="lb-lead">Stammdaten sind fest vorgegeben. Fehlt ein Eintrag, kommt er mit einer neuen Version der Anwendung.</p>
+    </header>
+    <div class="lb-card lb-toolbar">
+        <form method="get" th:action="@{/primers}" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label for="manufacturer" class="form-label">Hersteller</label>
+                <select id="manufacturer" name="manufacturer" class="form-select">
+                    <option value="">Alle</option>
+                    <option th:each="option : ${manufacturers}" th:value="${option.id}" th:text="${option.name}"
+                            th:selected="${option.id == selectedManufacturer}">Eintrag</option>
+                </select>
+            </div>
+            <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filtern</button>
+                <a class="btn btn-link" th:href="@{/primers}">Zurücksetzen</a>
+            </div>
+        </form>
+    </div>
+    <div class="lb-card lb-tablecard">
+        <p th:if="${page.empty}" class="lb-empty">Keine Einträge gefunden.</p>
+        <div th:unless="${page.empty}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                <th scope="col">Hersteller</th>
+                <th scope="col">Bezeichnung</th>
+                <th scope="col">Größe</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${page.items}">
+                <td th:text="${row.manufacturer}">manufacturer</td>
+                <td th:text="${row.name}">name</td>
+                <td th:text="${row.size}">size</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div th:replace="~{fragments/layout :: pagesize(${page})}"></div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-outline-primary">Filtern</button>
-            <a class="btn btn-link" th:href="@{/primers}">Zurücksetzen</a>
+        <div th:unless="${page.empty}" class="lb-tablefoot">
+            <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
         </div>
-    </form>
-    <p th:if="${page.empty}" class="text-secondary">Keine Einträge gefunden.</p>
-    <table th:unless="${page.empty}" class="table table-hover align-middle">
-        <thead>
-        <tr>
-            <th scope="col">Hersteller</th>
-            <th scope="col">Bezeichnung</th>
-            <th scope="col">Größe</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="row : ${page.items}">
-            <td th:text="${row.manufacturer}">manufacturer</td>
-            <td th:text="${row.name}">name</td>
-            <td th:text="${row.size}">size</td>
-        </tr>
-        </tbody>
-    </table>
-    <div th:replace="~{fragments/layout :: pagination(${page})}"></div>
+    </div>
 </main>
 <script th:replace="~{fragments/layout :: scripts}"></script>
 </body>
